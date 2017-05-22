@@ -15,15 +15,16 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Version details for the transfer gradebook report
+ * Version details for the grade transfer report
  *
- * @package    gradereport_transfer
- * @copyright  1999 onwards Martin Dougiamas (http://dougiamas.com)
+ * @package    grade_report_bath_transfer
+ * @author     John Illsley <j.s.illsley@bath.ac.uk>
+ * @copyright  2017 University of Bath
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 defined('MOODLE_INTERNAL') || die();
 
-$plugin->version   = 2017020900;        // The current plugin version (Date: YYYYMMDDXX)
+$plugin->version   = 2017020902;        // The current plugin version (Date: YYYYMMDDXX)
 $plugin->requires  = 2015111000;        // Requires this Moodle version
 $plugin->component = 'gradereport_transfer'; // Full name of the plugin (used for diagnostics)
