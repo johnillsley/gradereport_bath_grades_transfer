@@ -40,7 +40,8 @@ class grade_report_viewed extends \core\event\grade_report_viewed {
      */
     protected function init() {
         parent::init();
-        $this->data['edulevel'] = self::LEVEL_PARTICIPATING;
+        $this->data['crud'] = 'r';
+        $this->data['edulevel'] = self::LEVEL_OTHER;
     }
 
     /**

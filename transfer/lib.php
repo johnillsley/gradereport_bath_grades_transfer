@@ -23,6 +23,8 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+namespace gradereport_transfer;
+
 require_once($CFG->dirroot . '/grade/report/lib.php');
 require_once($CFG->dirroot . '/grade/report/transfer/classes/grade_transfer.php');
 
@@ -31,7 +33,7 @@ require_once($CFG->dirroot . '/grade/report/transfer/classes/grade_transfer.php'
  * @uses grade_report
  * @package grade_report_bath_transfer
  */
-class grade_report_bath_transfer extends grade_report
+class transfer_report extends \grade_report
 {
     /**
      * @integer mappingid for the report - id in table local_bath_grades_mapping
@@ -89,7 +91,7 @@ class grade_report_bath_transfer extends grade_report
         FROM {local_bath_grades_mapping} AS gm
         JOIN {local_bath_grades_lookup} AS gl
             ON gl.id = gm.assessment_lookup_id
-            AND gl.expired IS NULL
+            -- AND gl.expired IS NULL  -- need to show transfer history if mapping becomes expired
             
         /***** join students that have equivalent sits mapping *****/     
         JOIN {sits_mappings} AS sm
@@ -185,6 +187,8 @@ class grade_report_bath_transfer extends grade_report
     public function get_mapping_options($courseid, $year = null) {
         global $DB;
 
+        // Mapping lookups refreshed from cron on local plugin - so need to to refresh here!
+
         $params = array();
         $params[] = $courseid;
 
@@ -208,8 +212,9 @@ class grade_report_bath_transfer extends grade_report
             , gl.mab_name AS 'samis_assessment_name'
             , gl.academic_year
             , gl.occurrence
-            , gl.mab_sequence
+            , gl.mab_seq
             , gl.periodslotcode
+            , gl.expired
             , cm.course
             , cm.id AS 'coursemoduleid'
             , cm.instance
@@ -217,7 +222,9 @@ class grade_report_bath_transfer extends grade_report
             FROM {local_bath_grades_mapping} AS gm
             JOIN {local_bath_grades_lookup} AS gl ON gl.id = gm.assessment_lookup_id
             JOIN {course_modules} AS cm ON cm.id = gm.coursemodule
-            WHERE cm.course = ? " . $year_sql,
+            WHERE ( gl.expired IS NULL OR gl.expired = 0 OR EXISTS ( SELECT 1 FROM {local_bath_grades_log} AS l WHERE l.gradetransfermappingid = gl.id ) )
+            /* grade lookup is current or if expired some tranfers happened that might be of interest to user */
+            AND cm.course = ? " . $year_sql,
             $params
         );
 
@@ -232,7 +239,7 @@ class grade_report_bath_transfer extends grade_report
         foreach( $mappings as $mapping ) {
 
             // Drop down menu options for mapped external assessments
-            $option_external_str = $mapping->samis_assessment_name . ' (' . $mapping->academic_year . ' - ' . $mapping->periodslotcode . ') ' . $mapping->mab_sequence;
+            $option_external_str = $mapping->samis_assessment_name . ' (' . $mapping->academic_year . ' - ' . $mapping->periodslotcode . ') ' . $mapping->mab_seq;
             $options_external[$mapping->id] = $option_external_str;
             $moodle_module = $DB->get_record($mapping->moodle_activity_type, array('id' => $mapping->instance));
             $mapping->moodle_activity_name = $moodle_module->name;

@@ -35,6 +35,11 @@ class gradereport_transfer_renderer extends plugin_renderer_base {
     public $bulk_actions = false;
 
     /**
+     * @boolean valid mapping is set to false if a mapping is selected but has expired.
+     */
+    public $valid_mapping = true;
+
+    /**
      * Output of the summary details for the selected mapping
      * @param transfer report object $transfer_report
      * @return string
@@ -50,13 +55,14 @@ class gradereport_transfer_renderer extends plugin_renderer_base {
         $user_action = ($transfer_report->selected->timecreated==$transfer_report->selected->timemodified) ? get_string('createdby', 'question').' ' : get_string('lastmodifiedby', 'question').' ';
         $activity_progress = $transfer_report->get_progress();
 
-        $locked = ( !empty($transfer_report->selected->locked ) ) ? ' <span class="label label-warning">' . get_string('locked', 'grades') . '</span>' : '';
+        $warning = ( !empty($transfer_report->selected->locked ) ) ? ' <span class="label label-warning">' . get_string('locked', 'grades') . '</span>' : '';
 
         // Current status indicator
-        if( !1==1 ) { // TODO - USE CLASS IN LOCAL PLUGIN TO CHECK IF MAPPING IS VALID
+        if( $this->valid_mapping === false ) { // TODO - USE CLASS IN LOCAL PLUGIN TO CHECK IF MAPPING IS VALID
             // Transfer mapping no longer valid
-            $status  = '<span class="label label-danger">' . get_string('mappingnotvalid', 'gradereport_transfer') . '</span>';
+            $status  = '<span class="label label-danger">' . get_string('mappingnotvalid', 'gradereport_transfer') . '</span> ';
             $status .= '<strong><a href="' . $edit_page_url . '">' . get_string('reconfiguremapping', 'gradereport_transfer') . '</a></strong>';
+            $warning .= ' <span class="label label-danger">' . get_string('thisnolongerexists', 'gradereport_transfer') . '</span>';
         } elseif( empty($transfer_report->selected->samis_assessment_end_date)) {
             // Transfer time has not been specified
 
@@ -83,7 +89,7 @@ class gradereport_transfer_renderer extends plugin_renderer_base {
 
         $table->data[] = array(
             get_string('mappingitem', 'gradereport_transfer'),
-            '<strong>' . $transfer_report->selected->samis_assessment_name . '<strong>'. $locked
+            '<strong>' . $transfer_report->selected->samis_assessment_name . '<strong>'. $warning
         );
         $table->data[] = array(
             get_string('mappingreference', 'gradereport_transfer'),
@@ -132,7 +138,7 @@ class gradereport_transfer_renderer extends plugin_renderer_base {
     public function grade_transfer_table( $transfer_report ) {
         global $PAGE, $OUTPUT, $USER, $CFG, $DB;
 
-        $table = new flexible_table('user-index-participants-'.$PAGE->course->id);
+        $table = new flexible_table('user-grade-transfer-'.$PAGE->course->id);
 
         $tablecolumns = array();
         $tableheaders = array();
@@ -193,7 +199,7 @@ class gradereport_transfer_renderer extends plugin_renderer_base {
 
         $table->pagesize( $transfer_report->perpage, $transfer_report->matchcount );
 
-        $gradelist = $transfer_report->user_list( $table ); // TODO - Use separate SQL from confirm??
+        $gradelist = $transfer_report->user_list( $table );
 
         if( $gradelist->valid() ) {
 
@@ -214,8 +220,9 @@ class gradereport_transfer_renderer extends plugin_renderer_base {
                         // Transfer not attempted yet
                         $transferstatus = '<span class="label label-warning">' . get_string('transferpending', 'gradereport_transfer') . '</span>';
                     }
-                    if( !empty( $grade->finalgrade ) && $grade->rawgrademax == MAX_GRADE ) {
+                    if( !empty( $grade->finalgrade ) && $grade->rawgrademax == MAX_GRADE && $this->valid_mapping ) {
                         // Create transfer button and checkbox if there is a grade to transfer
+
                         $button_url = $CFG->wwwroot . '/grade/report/transfer/index.php?id='.$PAGE->course->id.'&mappingid='.$transfer_report->id.'&dotransfer=' . $grade->userid;
                         $transfernow = '<a href="' . $button_url . '" class="btn btn-default">'. get_string('transfergrade', 'gradereport_transfer') . '<a/>';
                         $checkbox = '<input type="checkbox" class="usercheckbox" name="user' . $grade->userid . '" />';
@@ -252,7 +259,16 @@ class gradereport_transfer_renderer extends plugin_renderer_base {
             }
         }
         $gradelist->close();
-        $output = $table;
+
+        $output  = '';
+        $output .= '<form action="index.php" method="post" id="participantsform">';
+        $output .= '<div>';
+        $output .= '<input type="hidden" name="sesskey" value="'.sesskey().'" />';
+        $output .=  '<input type="hidden" name="mappingid" value="'.$transfer_report->id.'" />';
+        $output .= '<input type="hidden" name="dotransfer" value="selected" />';
+        $output .= '<input type="hidden" name="returnto" value="'.s($PAGE->url->out(false)).'" />';
+        $output .= $table->finish_output();
+        $output .= '</form>';
 
         return $output;
     }

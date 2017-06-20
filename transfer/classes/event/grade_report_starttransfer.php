@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Transfer report transfer event.
+ * Transfer report start transfer event.
  *
  * @package    grade_report_bath_transfer
  * @author     John Illsley <j.s.illsley@bath.ac.uk>
@@ -32,7 +32,7 @@ defined('MOODLE_INTERNAL') || die();
  * @uses \core\event\grade_report_viewed
  * @package grade_report_bath_transfer
  */
-class grade_report_transfer extends \core\event\grade_report_viewed {
+class grade_report_starttransfer extends \core\event\grade_report_viewed {
 
     /**
      * Initialise the event data.
@@ -40,7 +40,8 @@ class grade_report_transfer extends \core\event\grade_report_viewed {
      */
     protected function init() {
         parent::init();
-        $this->data['edulevel'] = self::LEVEL_PARTICIPATING;
+        $this->data['crud'] = 'u';
+        $this->data['edulevel'] = self::LEVEL_OTHER;
     }
 
     /**

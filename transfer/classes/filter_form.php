@@ -60,10 +60,10 @@ class filter_form extends \moodleform {
         $mform->addElement('hidden', 'id', $course->id);
         $mform->setType('id', PARAM_INT);
 
-        $mform->addElement('hidden', 'sifirst', "");
+        $mform->addElement('hidden', 'sifirst', ""); // resets firstname initial filter when selecting new mapping
         $mform->setType('sifirst', PARAM_RAW);
 
-        $mform->addElement('hidden', 'silast', "");
+        $mform->addElement('hidden', 'silast', ""); // resets lastname initial filter when selecting new mapping
         $mform->setType('silast', PARAM_RAW);
 
         // Add a submit button.
