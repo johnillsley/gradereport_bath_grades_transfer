@@ -222,6 +222,11 @@ class transfer_report extends \grade_report
             FROM {local_bath_grades_mapping} AS gm
             JOIN {local_bath_grades_lookup} AS gl ON gl.id = gm.assessment_lookup_id
             JOIN {course_modules} AS cm ON cm.id = gm.coursemodule
+            JOIN {sits_mappings} AS sm 
+              ON sm.sits_code = gl.samis_unit_code 
+              AND sm.courseid = cm.course
+              AND sm.default_map = 1
+              AND sm.active = 1
             WHERE ( gl.expired IS NULL OR gl.expired = 0 OR EXISTS ( SELECT 1 FROM {local_bath_grades_log} AS l WHERE l.gradetransfermappingid = gl.id ) )
             /* grade lookup is current or if expired some tranfers happened that might be of interest to user */
             AND cm.course = ? " . $year_sql,
@@ -359,8 +364,8 @@ class transfer_report extends \grade_report
         $rs = $DB->get_record_sql("
                 SELECT
                   COUNT(*) AS total
-                , SUM( IF( gg.finalgrade IS NOT NULL, 1, 0 ) ) as graded
-                , SUM( IF( log.outcomeid = 1, 1, 0 ) ) as transferred
+                , IFNULL( SUM( IF( gg.finalgrade IS NOT NULL, 1, 0 ) ), 0) as graded
+                , IFNULL( SUM( IF( log.outcomeid = 1, 1, 0 ) ), 0) as transferred
                 " . $this->sql_from, $this->sql_params );
 
         return($rs);
