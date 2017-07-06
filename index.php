@@ -30,7 +30,7 @@ require_once $CFG->dirroot.'/grade/report/transfer/lib.php'; // Doesn't autoload
 //require_once $CFG->dirroot.'/grade/report/transfer/classes/event/grade_report_viewed.php';
 //require_once $CFG->dirroot.'/grade/report/transfer/classes/event/grade_report_starttransfer.php';
 //require_once $CFG->dirroot.'/grade/report/transfer/classes/filter_form.php'; // SHOULD THIS AUTO LOAD??
-//require_once $CFG->dirroot.'/local/bath_grades_transfer/lib.php';
+require_once $CFG->dirroot.'/local/bath_grades_transfer/lib.php';
 
 // Grade report transfer table constants
 define('USER_SMALL_CLASS', 20);   // Below this is considered small.
@@ -150,7 +150,7 @@ $course_has_samis_code = true; //TODO - remove this
 
 if( empty($dotransfer) && $course_has_samis_code ) {
 
-    echo "<p>". get_string('onlymappedassessments', 'gradereport_transfer') ."</p>";
+    echo "<p class='alert alert-info'>". get_string('onlymappedassessments', 'gradereport_transfer') ."</p>";
 
     // FILTER FORM
     // $transfer_report->get_mapping_options($course, $year);

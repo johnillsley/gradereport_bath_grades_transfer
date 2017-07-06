@@ -70,7 +70,7 @@ class gradereport_transfer_renderer extends plugin_renderer_base {
             $string['scheduletransfer'] = 'schedule a transfer in the moodle activity settings';
             $string['triggermanually'] = ' or trigger the transfer manually once the Moodle activity has been graded.';
 
-            $status  = '<span class="label label-warning">' . get_string('transfernotscheduled', 'gradereport_transfer') . '</span>';
+            $status  = '<p class="alert alert-warning">' . get_string('transfernotscheduled', 'gradereport_transfer') . '</p>';
             $status .= '<br/>' . get_string('youcaneither', 'gradereport_transfer');
             $status .= ' <strong><a href="' . $edit_page_url . '">' . get_string('scheduletransfer', 'gradereport_transfer') . '</a></strong>';
             $status .= get_string('triggermanually', 'gradereport_transfer');
