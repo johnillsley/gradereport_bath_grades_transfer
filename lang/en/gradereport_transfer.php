@@ -25,13 +25,13 @@
 
 $string['pluginname'] = 'Grade transfer';
 $string['mappingitem'] = 'SAMIS assessment';
-$string['mappingreference'] = 'SAMIS ID';
-$string['mappingcategory'] = 'Period slot code';
+$string['mappingreference'] = 'SAMIS Code';
+$string['mappingcategory'] = 'Period Slot Code';
 $string['datefrom'] = 'Submission date after';
 $string['dateto'] = 'Submission date before';
 $string['transferstatus'] = 'Transfer status';
-$string['moodleactivitytype'] = 'Moodle activity type';
-$string['moodleactivityname'] = 'Moodle activity name';
+$string['moodleactivitytype'] = 'Moodle Activity Type';
+$string['moodleactivityname'] = 'Moodle Activity Name';
 $string['mappingdetails'] = 'Transfer mapping details ';
 $string['transferstatus0'] = 'any transfer status';
 $string['transferstatus1'] = 'only completed transfers';
@@ -54,7 +54,7 @@ $string['gotoactivitysettings'] = 'Go to activity settings';
 $string['dotransfernow'] = 'Do transfer now';
 $string['transferscheduled'] = 'The automatic grade transfer is scheduled for';
 $string['transfercompleted'] = 'The automatic grade transfer was completed at';
-$string['moodleactivitycompletion'] = 'Moodle activity completion';
+$string['moodleactivitycompletion'] = 'Moodle Activity Completion';
 $string['transferconfirmheading'] = 'You are about to transfer the following grades to SAMIS for ';
 $string['proceedwithtransfer'] = 'Proceed with data transfer';
 $string['alreadytransferred'] = 'Grade already transferred to SAMIS';
