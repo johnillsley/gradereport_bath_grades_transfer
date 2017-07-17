@@ -27,6 +27,8 @@ namespace gradereport_transfer;
 
 require_once($CFG->dirroot . '/grade/report/lib.php');
 require_once($CFG->dirroot . '/grade/report/transfer/classes/grade_transfer.php');
+require_once($CFG->dirroot . '/local/bath_grades_transfer/lib.php');
+require_once($CFG->dirroot . '/local/bath_grades_transfer/classes/assessment_grades.php');
 
 /**
  * Class providing core functionality for the grade transfer report
@@ -137,6 +139,7 @@ class transfer_report extends \grade_report
         
         WHERE gm.id = :id
         ";
+        print $this->sql_from;
         $this->sql_params['id'] = $this->id;
     }
 
@@ -349,9 +352,14 @@ class transfer_report extends \grade_report
      */
     public function do_transfers($transfer_list=array()) {
         // Require local plugin class
-        // $do_transfer = new grade_transfer;
-        $grade_transfers = new \gradereport_transfer\grade_report_transfer_grade_transfer( $this->selected );
-        $grade_transfers->prepare_grade_transfer($transfer_list);
+
+        $grade_transfers = new \local_bath_grades_transfer();
+        $response = $grade_transfers->transfer_mapping( $this->selected->id, $transfer_list );
+
+
+        //todo - remove function below to transfer grades
+        //$grade_transfers = new \gradereport_transfer\grade_report_transfer_grade_transfer( $this->selected );
+        //$grade_transfers->prepare_grade_transfer($transfer_list);
     }
 
     /**

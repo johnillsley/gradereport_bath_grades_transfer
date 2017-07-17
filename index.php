@@ -41,6 +41,7 @@ define('MODE_USERDETAILS', 1);
 
 // Grade report transfer outcome constants
 // TODO - Probably need to remove the following constants as these are dealt with in the local plugin
+/*
 define('TRANSFER_SUCCESS', 1);
 define('TRANSFER_NO_GRADE', 2);
 define('TRANSFER_ERROR', 3);
@@ -48,6 +49,7 @@ define('GRADE_ALREADY_EXISTS', 4);
 define('NOT_IN_MOODLE_COURSE', 5);
 define('NOT_IN_SITS_STRUCTURE', 6);
 define('GRADE_NOT_OUT_OF_100', 7);
+*/
 //define('MAX_GRADE', 100); #Already defined in local grades transfer plugin
 
 $courseid        = required_param('id', PARAM_INT);
@@ -148,75 +150,78 @@ $grade_transfer = new \local_bath_grades_transfer();
 $course_has_samis_code = $grade_transfer->samis_mapping_exists($course->id);
 $course_has_samis_code = true; //TODO - remove this
 
-if( empty($dotransfer) && $course_has_samis_code ) {
+if( empty($dotransfer) ) {
 
-    echo "<p class='alert alert-info'>". get_string('onlymappedassessments', 'gradereport_transfer') ."</p>";
+    if ($course_has_samis_code) {
 
-    // FILTER FORM
-    // $transfer_report->get_mapping_options($course, $year);
-    $params['course']           = $course;
-    $params['years']            = $transfer_report->get_academic_year_options(); // TODO - NEED TO MOVE THIS ABOVE THIS FORM
-    $params['mappingids']       = $transfer_report->external_assessment; // Use $transfer_report->moodle_activity for moodle list
-    $params['selected_mapping'] = $mappingid;
-    $params['transferstatus']   = $transfer_report->get_status_options();
-    $params['selected_status']  = $transferstatus;
-    $mform = new \gradereport_transfer\filter_form(null, $params, 'get');
-    $mform->display();
-    // END OF FILTER FORM
+        echo "<p class='alert alert-info'>" . get_string('onlymappedassessments', 'gradereport_transfer') . "</p>";
 
-    if( $mappingid > 0 ) {
+        // FILTER FORM
+        // $transfer_report->get_mapping_options($course, $year);
+        $params['course'] = $course;
+        $params['years'] = $transfer_report->get_academic_year_options(); // TODO - NEED TO MOVE THIS ABOVE THIS FORM
+        $params['mappingids'] = $transfer_report->external_assessment; // Use $transfer_report->moodle_activity for moodle list
+        $params['selected_mapping'] = $mappingid;
+        $params['transferstatus'] = $transfer_report->get_status_options();
+        $params['selected_status'] = $transferstatus;
+        $mform = new \gradereport_transfer\filter_form(null, $params, 'get');
+        $mform->display();
+        // END OF FILTER FORM
 
-        // BEGINNING OF TRANSFER MAPPING OVERVIEW
-        echo "<h5>". get_string('transferoverview', 'gradereport_transfer')."</h5>";
-        echo $output->selected_mapping_overview($transfer_report);
-        // END OF TRANSFER MAPPING OVERVIEW
+        if ($mappingid > 0) {
 
-        // BEGINNING OF INDIVIDUAL GRADE TRANSFER TABLE
-        $transfer_report->perpage           = $perpage;
-        $transfer_report->search            = $search;
-        $transfer_report->sifirst           = $sifirst;
-        $transfer_report->silast            = $silast;
-        $transfer_report->transferstatus    = $transferstatus;
+            // BEGINNING OF TRANSFER MAPPING OVERVIEW
+            echo "<h5>" . get_string('transferoverview', 'gradereport_transfer') . "</h5>";
+            echo $output->selected_mapping_overview($transfer_report);
+            // END OF TRANSFER MAPPING OVERVIEW
 
-        $module = array('name' => 'core_user', 'fullpath' => '/user/module.js');
-        $PAGE->requires->js_init_call('M.core_user.init_participation', null, false, $module);
-/*
-        echo '<form action="index.php" method="post" id="participantsform">';
-        echo '<div>';
-        echo '<input type="hidden" name="sesskey" value="'.sesskey().'" />';
-        echo '<input type="hidden" name="mappingid" value="'.$transfer_report->id.'" />';
-        echo '<input type="hidden" name="dotransfer" value="selected" />';
-        echo '<input type="hidden" name="returnto" value="'.s($PAGE->url->out(false)).'" />';
-*/
-        echo "<h5>". get_string('transferlog', 'gradereport_transfer') . " (" . get_string('transferstatus'.$transferstatus, 'gradereport_transfer') . ")</h5>";
+            // BEGINNING OF INDIVIDUAL GRADE TRANSFER TABLE
+            $transfer_report->perpage = $perpage;
+            $transfer_report->search = $search;
+            $transfer_report->sifirst = $sifirst;
+            $transfer_report->silast = $silast;
+            $transfer_report->transferstatus = $transferstatus;
 
-        //$table = $output->grade_transfer_table($transfer_report);
-        //echo $table->print_html();
+            $module = array('name' => 'core_user', 'fullpath' => '/user/module.js');
+            $PAGE->requires->js_init_call('M.core_user.init_participation', null, false, $module);
+            /*
+                    echo '<form action="index.php" method="post" id="participantsform">';
+                    echo '<div>';
+                    echo '<input type="hidden" name="sesskey" value="'.sesskey().'" />';
+                    echo '<input type="hidden" name="mappingid" value="'.$transfer_report->id.'" />';
+                    echo '<input type="hidden" name="dotransfer" value="selected" />';
+                    echo '<input type="hidden" name="returnto" value="'.s($PAGE->url->out(false)).'" />';
+            */
+            echo "<h5>" . get_string('transferlog', 'gradereport_transfer') . " (" . get_string('transferstatus' . $transferstatus, 'gradereport_transfer') . ")</h5>";
 
-        echo $output->grade_transfer_table($transfer_report);
+            //$table = $output->grade_transfer_table($transfer_report);
+            //echo $table->print_html();
 
-        if($output->bulk_actions && $output->valid_mapping) echo $output->table_bulk_actions();
+            echo $output->grade_transfer_table($transfer_report);
 
-        //echo '</div>';
-        //echo '</form>';
+            if ($output->bulk_actions && $output->valid_mapping) echo $output->table_bulk_actions();
 
-        echo $output->table_name_search_form($transfer_report, $baseurl);
+            //echo '</div>';
+            //echo '</form>';
 
-        //echo '</div>';  // Userlist.
-        // END OF INDIVIDUAL GRADE TRANSFER TABLE
+            echo $output->table_name_search_form($transfer_report, $baseurl);
 
-        // Log that transfer mapping has been viewed
-        $event = \gradereport_transfer\event\grade_report_viewed::create(
-            array(
-                'context' => $context,
-                'courseid' => $courseid,
-                'other' => array('mappingid' => $mappingid, 'assessment_name' =>  $transfer_report->selected->samis_assessment_name ),
-            )
-        );
-        $event->trigger();
+            //echo '</div>';  // Userlist.
+            // END OF INDIVIDUAL GRADE TRANSFER TABLE
+
+            // Log that transfer mapping has been viewed
+            $event = \gradereport_transfer\event\grade_report_viewed::create(
+                array(
+                    'context' => $context,
+                    'courseid' => $courseid,
+                    'other' => array('mappingid' => $mappingid, 'assessment_name' => $transfer_report->selected->samis_assessment_name),
+                )
+            );
+            $event->trigger();
+        }
+    } else {
+        echo get_string('courseisnotmapped', 'gradereport_transfer');
     }
-} else {
-    echo get_string('courseisnotmapped', 'gradereport_transfer');
 }
 
 echo $output->footer();

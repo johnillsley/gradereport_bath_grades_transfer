@@ -59,7 +59,9 @@ class grade_report_viewed extends \core\event\grade_report_viewed {
      * @return string
      */
     public function get_description() {
-        return "The user with id '$this->userid' viewed the $this->reporttype report in the gradebook ($this->other['assessment_name']).";
+
+        $assessment_name = $this->other['assessment_name'];
+        return "The user with id '$this->userid' viewed the $this->reporttype report in the gradebook ($assessment_name).";
     }
 
     /**
