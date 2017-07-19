@@ -69,7 +69,7 @@ class gradereport_transfer_renderer extends plugin_renderer_base {
             $status .= '<br/>' . get_string('youcaneither', 'gradereport_transfer');
             $status .= ' <strong><a href="' . $edit_page_url . '">' . get_string('scheduletransfer', 'gradereport_transfer') . '</a></strong>';
             $status .= get_string('triggermanually', 'gradereport_transfer');
-            $status .= '<br/><a class="btn btn-default" href="' . $do_transfers_url . '">' . get_string('dotransfernow', 'gradereport_transfer') . '</a>';
+            $status .= '<br/><a class="btn btn-default" href="' . $do_transfers_url . '">' . get_string('transferall', 'gradereport_transfer') . '</a>';
         } elseif($transfer_report->selected->samis_assessment_end_date > time()) {
             // Transfer will occur in the future
             $status = get_string('transferscheduled', 'gradereport_transfer') . ' <strong>' . userdate($transfer_report->selected->samis_assessment_end_date) . '</strong>';
@@ -398,7 +398,8 @@ class gradereport_transfer_renderer extends plugin_renderer_base {
         }
         //$output .= '<input type="hidden" name="returnto" value="'.s($PAGE->url->out(false)).'" />'; // TODO value
 
-        $output .= '<button type="submit">'.get_string('proceedwithtransfer', 'gradereport_transfer').'</button>';
+        $output .= '<button class="btn btn-success" type="submit">'.get_string('proceedwithtransfer', 'gradereport_transfer').'</button>';
+        $output .= ' <a href="index.php?id='.$PAGE->course->id.'&mappingid='.$transfer_report->id.'" class="btn btn-danger">'.get_string('canceltransfer', 'gradereport_transfer').'</a>';
         $output .= '</form>';
 
         return $output;

@@ -35,7 +35,7 @@ require_once $CFG->dirroot.'/local/bath_grades_transfer/lib.php';
 // Grade report transfer table constants
 define('USER_SMALL_CLASS', 20);   // Below this is considered small.
 define('USER_LARGE_CLASS', 200);  // Above this is considered large.
-define('DEFAULT_PAGE_SIZE', 3);
+define('DEFAULT_PAGE_SIZE', 15);
 define('SHOW_ALL_PAGE_SIZE', 5000);
 define('MODE_USERDETAILS', 1);
 
@@ -141,7 +141,7 @@ print_grade_page_head($course->id, 'report', 'transfer', $title, false, $buttons
 
 if( $confirmtransfer == 0 && !empty($dotransfer) ) {
     $transfer_list = $transfer_report->get_transfer_list($dotransfer);
-    echo "<h5>". get_string('transferconfirmheading', 'gradereport_transfer').$transfer_report->selected->samis_assessment_name."</h5>";
+    echo  get_string('transferconfirmheading', 'gradereport_transfer')."<h5>".$transfer_report->selected->samis_assessment_name."</h5>";
     echo $output->confirm_transfers($transfer_report,  $transfer_list, $dotransfer);
 }
 // END PROCESS GRADE TRANSFER
