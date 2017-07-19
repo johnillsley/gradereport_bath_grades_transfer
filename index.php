@@ -184,25 +184,22 @@ if( empty($dotransfer) ) {
 
             $module = array('name' => 'core_user', 'fullpath' => '/user/module.js');
             $PAGE->requires->js_init_call('M.core_user.init_participation', null, false, $module);
-            /*
-                    echo '<form action="index.php" method="post" id="participantsform">';
-                    echo '<div>';
-                    echo '<input type="hidden" name="sesskey" value="'.sesskey().'" />';
-                    echo '<input type="hidden" name="mappingid" value="'.$transfer_report->id.'" />';
-                    echo '<input type="hidden" name="dotransfer" value="selected" />';
-                    echo '<input type="hidden" name="returnto" value="'.s($PAGE->url->out(false)).'" />';
-            */
+
+            echo '<form action="index.php" method="post" id="participantsform">';
+            echo '<div>';
+            echo '<input type="hidden" name="sesskey" value="'.sesskey().'" />';
+            echo '<input type="hidden" name="mappingid" value="'.$transfer_report->id.'" />';
+            echo '<input type="hidden" name="dotransfer" value="selected" />';
+            echo '<input type="hidden" name="returnto" value="'.s($PAGE->url->out(false)).'" />';
+
             echo "<h5>" . get_string('transferlog', 'gradereport_transfer') . " (" . get_string('transferstatus' . $transferstatus, 'gradereport_transfer') . ")</h5>";
 
-            //$table = $output->grade_transfer_table($transfer_report);
-            //echo $table->print_html();
-
-            echo $output->grade_transfer_table($transfer_report);
+            $output->grade_transfer_table($transfer_report);
 
             if ($output->bulk_actions && $output->valid_mapping) echo $output->table_bulk_actions();
 
             //echo '</div>';
-            //echo '</form>';
+            echo '</form>';
 
             echo $output->table_name_search_form($transfer_report, $baseurl);
 
