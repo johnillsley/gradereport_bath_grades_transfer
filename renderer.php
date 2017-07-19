@@ -398,7 +398,8 @@ class gradereport_transfer_renderer extends plugin_renderer_base {
         }
         //$output .= '<input type="hidden" name="returnto" value="'.s($PAGE->url->out(false)).'" />'; // TODO value
 
-        $output .= '<button type="submit">'.get_string('proceedwithtransfer', 'gradereport_transfer').'</button>';
+        $output .= '<button class="btn btn-success" type="submit">'.get_string('proceedwithtransfer', 'gradereport_transfer').'</button>';
+        $output .= ' <a href="index.php?id='.$PAGE->course->id.'&mappingid='.$transfer_report->id.'" class="btn btn-danger">'.get_string('canceltransfer', 'gradereport_transfer').'</a>';
         $output .= '</form>';
 
         return $output;
