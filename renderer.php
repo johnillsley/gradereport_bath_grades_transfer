@@ -406,4 +406,15 @@ class gradereport_transfer_renderer extends plugin_renderer_base {
         $max_display = ( $max_grade==MAX_GRADE ) ? $max_grade : '<span class="max_grade_warning">'.$max_grade.'</span>' ;
         return ( !empty($grade->finalgrade) ) ? round( $grade->finalgrade ).' / '.$max_display : '';
     }
+    public function render_transfer_status(\templatable $transfer_status){
+        $data = $transfer_status->export_for_template($this);
+        var_dump($data);
+        if(($data->status == 'failure') && isset($data->reason)){
+            return $this->render_from_template('gradereport_transfer/transfer_failed', $data);
+        }
+        else{
+            return $this->render_from_template('gradereport_transfer/transfer_success', $data);
+        }
+
+    }
 }
