@@ -132,13 +132,19 @@ if( $confirmtransfer == 1 && !empty($dotransfer) ) {
 
     $transfer_list = $transfer_report->get_transfer_list($dotransfer);
     $transfer_outcomes = $transfer_report->do_transfers($transfer_list);
-    // do_transfer_mapping($mappingid,$transfer_list ); // TODO - in lib.php new \local_bath_grades_transfer();
-    redirect("index.php?id=".$course->id."&mappingid=".$transfer_report->id, "Transfers processed");
+    //Show me the outcomes
+    $outcome_output =  $output->render_transfer_status($transfer_outcomes);
+     // do_transfer_mapping($mappingid,$transfer_list ); // TODO - in lib.php new \local_bath_grades_transfer();
+   // redirect("index.php?id=".$course->id."&mappingid=".$transfer_report->id, "Transfers processed");
 }
 
 $buttons=false;
 print_grade_page_head($course->id, 'report', 'transfer', $title, false, $buttons);
 
+/// Show outcomes if any
+if(!empty($outcome_output)){
+    echo $outcome_output;
+}
 if( $confirmtransfer == 0 && !empty($dotransfer) ) {
     $transfer_list = $transfer_report->get_transfer_list($dotransfer);
     echo  get_string('transferconfirmheading', 'gradereport_transfer')."<h5>".$transfer_report->selected->samis_assessment_name."</h5>";
