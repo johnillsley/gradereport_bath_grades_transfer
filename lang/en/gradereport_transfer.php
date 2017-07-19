@@ -73,3 +73,4 @@ $string['courseisnotmapped'] = 'This course does not have a valid SAMIS mapping 
 $string['eventgradereportviewed'] = 'Grade transfer report viewed';
 $string['eventgradereporttransfer'] = 'Grade transfer triggered';
 $string['onlymappedassessments'] = 'Only mapped assessments are listed';
+$string['canceltransfer']= 'Cancel';
