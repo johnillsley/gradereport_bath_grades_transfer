@@ -218,7 +218,7 @@ class gradereport_transfer_renderer extends plugin_renderer_base {
                     if( !empty( $grade->finalgrade ) && $grade->rawgrademax == MAX_GRADE && $this->valid_mapping ) {
                         // Create transfer button and checkbox if there is a grade to transfer
 
-                        $button_url = $CFG->wwwroot . '/grade/report/transfer/index.php?id='.$PAGE->course->id.'&mappingid='.$transfer_report->id.'&dotransfer=' . $grade->userid;
+                        $button_url = $CFG->wwwroot . '/grade/report/transfer/index.php?id='.$PAGE->course->id.'&mappingid='.$transfer_report->id.'&dotransfer='.$grade->userid.'&returnto='.s($PAGE->url->out(false));
                         $transfernow = '<a href="' . $button_url . '" class="btn btn-default">'. get_string('transfergrade', 'gradereport_transfer') . '<a/>';
                         $checkbox = '<input type="checkbox" class="usercheckbox" name="user' . $grade->userid . '" />';
                         $this->bulk_actions = true;
@@ -255,17 +255,7 @@ class gradereport_transfer_renderer extends plugin_renderer_base {
         }
         $gradelist->close();
 
-        $output  = '';
-        $output .= '<form action="index.php" method="post" id="participantsform">';
-        $output .= '<div>';
-        $output .= '<input type="hidden" name="sesskey" value="'.sesskey().'" />';
-        $output .=  '<input type="hidden" name="mappingid" value="'.$transfer_report->id.'" />';
-        $output .= '<input type="hidden" name="dotransfer" value="selected" />';
-        $output .= '<input type="hidden" name="returnto" value="'.s($PAGE->url->out(false)).'" />';
-        $output .= $table->finish_output();
-        $output .= '</form>';
-
-        return $output;
+        $table->print_html();
     }
 
     /**
@@ -360,7 +350,7 @@ class gradereport_transfer_renderer extends plugin_renderer_base {
             get_string('grade'),
             get_string('lastgraded', 'gradereport_transfer'),
             get_string('transferstatus', 'gradereport_transfer')
-        );
+    );
 
         foreach($confirm_list as $confirm_item) {
             $user = $DB->get_record('user', array('id' => $confirm_item->userid));
@@ -391,15 +381,15 @@ class gradereport_transfer_renderer extends plugin_renderer_base {
         $output .= '<input type="hidden" name="id" value="'.$PAGE->course->id.'" />';
         $output .= '<input type="hidden" name="mappingid" value="'.$transfer_report->id.'" />';
         if( $dotransfer=="selected" ) {
-            $userids = $transfer_report->get_transfer_list("selected");
-            foreach($userids as $userid) {
+            //$userids = $transfer_report->get_transfer_list("selected");
+            foreach($transfer_list as $userid) {
                 $output .= '<input type="hidden" name="user'.$userid.'" value="on" />';
             }
         }
         //$output .= '<input type="hidden" name="returnto" value="'.s($PAGE->url->out(false)).'" />'; // TODO value
 
         $output .= '<button class="btn btn-success" type="submit">'.get_string('proceedwithtransfer', 'gradereport_transfer').'</button>';
-        $output .= ' <a href="index.php?id='.$PAGE->course->id.'&mappingid='.$transfer_report->id.'" class="btn btn-danger">'.get_string('canceltransfer', 'gradereport_transfer').'</a>';
+        $output .= ' <a href="javascript:history.back()" class="btn btn-danger">'.get_string('canceltransfer', 'gradereport_transfer').'</a>';
         $output .= '</form>';
 
         return $output;

@@ -230,8 +230,8 @@ class transfer_report extends \grade_report
               AND sm.courseid = cm.course
               AND sm.default_map = 1
               AND sm.active = 1
-              AND sm.acyear = '2015/6'
-              AND sm.period_code = 'S1'
+              AND sm.acyear = gl.academic_year
+              AND sm.period_code = gl.periodslotcode
             WHERE ( gl.expired IS NULL OR gl.expired = 0 OR EXISTS ( SELECT 1 FROM {local_bath_grades_log} AS l WHERE l.gradetransfermappingid = gl.id ) )
             /* grade lookup is current or if expired some tranfers happened that might be of interest to user */
             AND cm.course = ? " . $year_sql,
