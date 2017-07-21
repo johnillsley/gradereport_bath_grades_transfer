@@ -2,3 +2,6 @@
     color: #c23a34;
     font-weight: bold;
 }
+#confirm_transfer_table th {
+    width: 300px;
+}
