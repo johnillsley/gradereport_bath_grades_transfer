@@ -48,7 +48,7 @@ class transfer_report extends \grade_report
     /**
      * @var FROM parameters for all SQL in class.
      */
-    private $sql_params=array();
+    private $sql_params = array();
     /**
      * @var the count of number of users on the transfer log report after name search and initials filters are applied.
      */
@@ -83,8 +83,7 @@ class transfer_report extends \grade_report
      * grade_report_bath_transfer constructor.
      * @param integer $mappingid
      */
-    public function __construct($courseid, $gpr, $context, $mappingid)
-    {
+    public function __construct($courseid, $gpr, $context, $mappingid) {
         parent::__construct($courseid, $gpr, $context);
 
         $this->id = $mappingid;
@@ -124,7 +123,7 @@ class transfer_report extends \grade_report
                 , gradetransfermappingid
                 , MAX( timetransferred ) AS timetransferred
             FROM {local_bath_grades_log}
-            WHERE outcomeid != ".GRADE_ALREADY_EXISTS."
+            WHERE outcomeid != " . GRADE_ALREADY_EXISTS . "
             GROUP BY userid, gradetransfermappingid
         ) AS last_log
             ON last_log.userid = gg.userid
@@ -149,8 +148,7 @@ class transfer_report extends \grade_report
      * @param array $data
      * @return void
      */
-    public function process_data($data)
-    {
+    public function process_data($data) {
 
     }
 
@@ -160,12 +158,12 @@ class transfer_report extends \grade_report
      * @param string $action Which action to take (edit, delete etc...)
      * @return void
      */
-    public function process_action($target, $action)
-    {
+    public function process_action($target, $action) {
 
     }
 
     // TODO - do we need academic year?
+
     /**
      * Gets all academic year options used within external assessments.
      * @return array $years - all distinct academic years that exist in
@@ -246,7 +244,7 @@ class transfer_report extends \grade_report
         $options_external[0] = get_string('selectassessment', 'gradereport_transfer');
         //$options_moodle[0] = get_string('selectassessment', 'gradereport_transfer');
 
-        foreach( $mappings as $mapping ) {
+        foreach ($mappings as $mapping) {
 
             // Drop down menu options for mapped external assessments
             $option_external_str = $mapping->samis_assessment_name . ' (' . $mapping->academic_year . ' - ' . $mapping->periodslotcode . ') ' . $mapping->mab_seq;
@@ -257,7 +255,7 @@ class transfer_report extends \grade_report
             // Drop down menu options for mapped moodle activities
             //$options_moodle[$mapping->id] = $mapping->moodle_activity_name;
 
-            if($mapping->id == $this->id) {
+            if ($mapping->id == $this->id) {
                 $selected = $mapping;
             }
         }
@@ -270,11 +268,10 @@ class transfer_report extends \grade_report
      * Get the report filter options
      * @return array $options
      */
-    function get_status_options()
-    {
+    function get_status_options() {
         $options = array();
-        for( $statusid = 0 ; $statusid<4 ; $statusid++ ) {
-            $options[] = get_string('transferstatus'.$statusid, 'gradereport_transfer');
+        for ($statusid = 0; $statusid < 4; $statusid++) {
+            $options[] = get_string('transferstatus' . $statusid, 'gradereport_transfer');
         }
         return $options;
     }
@@ -286,8 +283,7 @@ class transfer_report extends \grade_report
      */
     public function get_transfer_list($dotransfer) {
 
-        switch( $dotransfer )
-        {
+        switch ($dotransfer) {
             case 'all':
                 $transfer_list = $this->get_all_users();
                 break;
@@ -310,7 +306,7 @@ class transfer_report extends \grade_report
         $userids = array();
 
         $users = $this->confirm_list();
-        foreach( $users as $user ) {
+        foreach ($users as $user) {
             $userids[] = $user->userid;
         }
         return $userids;
@@ -323,11 +319,11 @@ class transfer_report extends \grade_report
     private function get_selected_users() {
         $userids = array();
 
-        foreach( $_POST as $k=>$v ) {
-            if( substr($k, 0, 4 )=='user' ) { // user is start of checkbox name
+        foreach ($_POST as $k => $v) {
+            if (substr($k, 0, 4) == 'user') { // user is start of checkbox name
                 // get userid for selected checkbox
-                $userid = substr($k, 4 );
-                if($userid>0) {
+                $userid = substr($k, 4);
+                if ($userid > 0) {
                     $userids[] = $userid;
                 }
             }
@@ -340,7 +336,7 @@ class transfer_report extends \grade_report
      * @return array containing single userid
      */
     private function get_individual_user($userid) {
-        if( $userid>0 ) {
+        if ($userid > 0) {
             return array($userid);
         } else {
             return array();
@@ -352,13 +348,12 @@ class transfer_report extends \grade_report
      * @param array $transfer_list - userids
      * @return array containing single userid
      */
-    public function do_transfers($transfer_list=array()) {
+    public function do_transfers($transfer_list = array()) {
         // Require local plugin class
 
-
         $grade_transfers = new \local_bath_grades_transfer();
-        $response = $grade_transfers->transfer_mapping( $this->selected->id, $transfer_list );
-        return $response;
+        $responses = $grade_transfers->transfer_mapping($this->id, $transfer_list);
+        return $responses;
 
         //todo - remove function below to transfer grades
         //$grade_transfers = new \gradereport_transfer\grade_report_transfer_grade_transfer( $this->selected );
@@ -377,9 +372,9 @@ class transfer_report extends \grade_report
                   COUNT(*) AS total
                 , IFNULL( SUM( IF( gg.finalgrade IS NOT NULL, 1, 0 ) ), 0) as graded
                 , IFNULL( SUM( IF( log.outcomeid = 1, 1, 0 ) ), 0) as transferred
-                " . $this->sql_from, $this->sql_params );
+                " . $this->sql_from, $this->sql_params);
 
-        return($rs);
+        return ($rs);
     }
 
     /**
@@ -387,11 +382,11 @@ class transfer_report extends \grade_report
      * @param object $table - required for paging information
      * @return moodle_recordset $rs
      */
-    public function user_list( $table ) {
+    public function user_list($table) {
         global $DB;
 
         $limitfrom = $table->get_page_start();
-        $limitnum  = $table->get_page_size();
+        $limitnum = $table->get_page_size();
 
         $order_sql = "";
         if ($orderby = $table->get_sql_sort()) {
@@ -400,25 +395,25 @@ class transfer_report extends \grade_report
             $order_sql .= ' ORDER BY lastname, firstname';
         }
 
-        $this->totalcount = $DB->count_records_sql("SELECT COUNT(ue.userid) ". $this->sql_from, $this->sql_params );
+        $this->totalcount = $DB->count_records_sql("SELECT COUNT(ue.userid) " . $this->sql_from, $this->sql_params);
 
-        if( !empty($this->search) ) {
+        if (!empty($this->search)) {
             $fullname = $DB->sql_fullname('u.firstname', 'u.lastname');
-            $this->sql_from .= " AND ".$DB->sql_like($fullname, ':search', false, false);
+            $this->sql_from .= " AND " . $DB->sql_like($fullname, ':search', false, false);
             $this->sql_params['search'] = "%$this->search%";
         }
 
-        if( !empty($this->sifirst) ) {
+        if (!empty($this->sifirst)) {
             $this->sql_from .= " AND " . $DB->sql_like('firstname', ':sifirst', false, false);
             $this->sql_params['sifirst'] = "$this->sifirst%";
         }
 
-        if( !empty($this->silast) ) {
+        if (!empty($this->silast)) {
             $this->sql_from .= " AND " . $DB->sql_like('lastname', ':silast', false, false);
             $this->sql_params['silast'] = "$this->silast%";
         }
 
-        switch( $this->transferstatus ) {
+        switch ($this->transferstatus) {
             case 1: // Completed transfers
                 $this->sql_from .= " AND log.outcomeid = 1";
                 break;
@@ -429,7 +424,7 @@ class transfer_report extends \grade_report
                 $this->sql_from .= " AND log.outcomeid IS NULL";
                 break;
         }
-        $this->matchcount = $DB->count_records_sql("SELECT COUNT(ue.userid) ". $this->sql_from, $this->sql_params );
+        $this->matchcount = $DB->count_records_sql("SELECT COUNT(ue.userid) " . $this->sql_from, $this->sql_params);
 
         $rs = $DB->get_recordset_sql("
             SELECT
@@ -457,10 +452,10 @@ class transfer_report extends \grade_report
      * @param array $tansfer_list - userids
      * @return array $rs of objects
      */
-    public function confirm_list( $transfer_list=array()) {
+    public function confirm_list($transfer_list = array()) {
         global $DB;
 
-        if( count($transfer_list)>0 ) {
+        if (count($transfer_list) > 0) {
             list($insql, $inparams) = $DB->get_in_or_equal($transfer_list, SQL_PARAMS_NAMED);
             $this->sql_params = array_merge($this->sql_params, $inparams);
             $subset_sql = " AND ue.userid $insql";
@@ -475,7 +470,7 @@ class transfer_report extends \grade_report
             , gg.rawgrademax
             , gg.timemodified AS 'timegraded'
             , log.outcomeid
-            ". $this->sql_from.$subset_sql , $this->sql_params
+            " . $this->sql_from . $subset_sql, $this->sql_params
         );
 
         return $rs;
