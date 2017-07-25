@@ -461,7 +461,7 @@ class transfer_report extends \grade_report
         } else {
             $subset_sql = "";
         }
-        $order_by = "ORDER BY log.outcomeid DESC,gg.finalgrade DESC,u.lastname ASC,u.firstname ASC";
+        $order_by = "ORDER BY log.outcomeid DESC,IF(gg.finalgrade > 0,1,0) DESC,u.lastname ASC,u.firstname ASC";
         $rs = $DB->get_records_sql("
             SELECT
               ue.userid
