@@ -6,13 +6,6 @@ define(['jquery', 'core/templates', 'core/ajax', 'core/config', 'core/yui'], fun
         var failed_transfers_count = data.failed;
         var succcess_transfer_text = "Grades sent to SAMIS successfully : <span class='label-info label'>" + success_transfers_count + "</span>";
         var failed_transfer_text = "Failed transfers : <span class='label-danger label'>" + failed_transfers_count + "</span>";
-
-        //total transferred
-        //total failed
-        //time taken
-
-        //Show modal
-
         var yuiDialogue = new M.core.dialogue({
             headerContent: 'Summary',
             bodyContent: "<p>" + succcess_transfer_text + "</p>" + "<p>" + failed_transfer_text + "</p>",
@@ -33,9 +26,6 @@ define(['jquery', 'core/templates', 'core/ajax', 'core/config', 'core/yui'], fun
             section: Y.WidgetStdMod.FOOTER
         });
         yuiDialogue.show();
-
-
-        //$('#transfer_summary p').show().html("<p>"+succcess_transfer_text+"</p>"+"<p>"+failed_transfer_text+"</p>");
     };
     var sendSingleGrade = function (users, data_json, succ_count, failed_count) {
         var single_user = users[0];
@@ -116,7 +106,8 @@ define(['jquery', 'core/templates', 'core/ajax', 'core/config', 'core/yui'], fun
         e.preventDefault();
         //disable the button
         $(node).attr('disabled', true);
-        $(node).next().html('Go Back');
+        var data = form.serializeArray();
+        $(node).next().html('Go Back').attr('href', config.wwwroot + '/grade/report/transfer/index.php?id=' + data[3].value);
         $("body").css("cursor", "progress");
         $('#confirm_transfer_table .transfer_status')
             .removeClass()
@@ -128,54 +119,16 @@ define(['jquery', 'core/templates', 'core/ajax', 'core/config', 'core/yui'], fun
         var parent_tr_nodes = $('#confirm_transfer_table tbody tr');
 
         var form = $('#transferconfirmed');
-        var data = form.serializeArray();
+
         //console.log(data);
         var users = getUsers(parent_tr_nodes);
         //Now that I have the users, get the first one in the index.
         var success_transferred_count = 0;
         var failed_transferred_count = 0;
-
         sendSingleGrade(users, data, success_transferred_count, failed_transferred_count);
-
-
-        /*$.ajax({
-         type: 'POST',
-         dataType: 'json',
-         data: data,
-         url: URL
-         }).done(function (transfer_status) {
-         //Set the transfer status
-         //call func(n)
-         $("body").css("cursor", "default");
-         console.log(transfer_status);
-
-         $.each( transfer_status,function(index,value){
-         $.each( parent_tr_nodes,function(i,tr_node){
-         var node_user_value = $(tr_node).attr('data-moodle-user-id');
-         console.log(node_user_value);
-         if(node_user_value == value.userid ){
-         console.log("YEs I found a target..Applying it");
-         $('#confirm_transfer_table tbody').find("tr[data-moodle-user-id='"+value.userid+"']")
-         .find('.transfer_status')
-         .removeClass('label-warning')
-         .addClass('label-success')
-         .html('Grade sent successfully to SAMIS');
-         }
-         });
-         });
-
-         //$('#confirm_transfer_table .transfer_status').html('Grade sent successfully to SAMIS')
-         });*/
-
     };
     return {
         init: function () {
-            //Catch the button click here
-            /*$(document).bind("ajaxSend", function(){
-             $(".loadingDiv").show();
-             }).bind("ajaxComplete", function(){
-             $(".loadingDiv").hide();
-             });*/
             $('#proceed_grade_transfer').click(function (e) {
                 sendGrades(this, e);
             });
