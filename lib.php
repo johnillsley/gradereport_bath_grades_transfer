@@ -454,7 +454,6 @@ class transfer_report extends \grade_report
      */
     public function confirm_list($transfer_list = array()) {
         global $DB;
-
         if (count($transfer_list) > 0) {
             list($insql, $inparams) = $DB->get_in_or_equal($transfer_list, SQL_PARAMS_NAMED);
             $this->sql_params = array_merge($this->sql_params, $inparams);
@@ -462,7 +461,7 @@ class transfer_report extends \grade_report
         } else {
             $subset_sql = "";
         }
-
+        $order_by = "ORDER BY log.outcomeid DESC,IF(gg.finalgrade > 0,1,0) DESC,u.lastname ASC,u.firstname ASC";
         $rs = $DB->get_records_sql("
             SELECT
               ue.userid
@@ -470,7 +469,7 @@ class transfer_report extends \grade_report
             , gg.rawgrademax
             , gg.timemodified AS 'timegraded'
             , log.outcomeid
-            " . $this->sql_from . $subset_sql, $this->sql_params
+            " . $this->sql_from . $subset_sql.$order_by, $this->sql_params
         );
 
         return $rs;
