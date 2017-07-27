@@ -191,6 +191,7 @@ class gradereport_transfer_renderer extends plugin_renderer_base
         ));
 
         $table->setup();
+        $table->is_persistent(true);
         $table->initialbars(true);
 
         $table->pagesize($transfer_report->perpage, $transfer_report->matchcount);
@@ -360,21 +361,24 @@ class gradereport_transfer_renderer extends plugin_renderer_base
             if ($confirm_item->outcomeid == 1) {
                 $status = '<span class="label label-warning transfer_status">' . get_string('alreadytransferred', 'gradereport_transfer') . '</span>';
             } elseif (empty($confirm_item->finalgrade)) {
-                $status = '<span class="label label-danger transfer_status">' . get_string('nogradetotransfer', 'gradereport_transfer') . '</span>';
+                $status = '<span class="label label-warning transfer_status">' . get_string('nogradetotransfer', 'gradereport_transfer') . '</span>';
             } elseif ($confirm_item->rawgrademax != MAX_GRADE) {
                 $status = '<span class="label label-danger transfer_status">' . get_string('wrongmaxgrade', 'gradereport_transfer') . '</span>';
             } else {
                 $status = '<span class="label label-success transfer_status">' . get_string('willbetransferred', 'gradereport_transfer') . '</span>';
             }
-            $loading_div = "<div class='loadingDiv' style='display: none;'><img width='32' height='32' src='images/Wedges.gif'/></div>$status";
-            $row = new html_table_row(array(
-                fullname($user),
-                $this->display_grade($confirm_item),
-                $graded,
-                $loading_div
-            ));
-            $row->attributes = array("class" => "", "data-moodle-user-id" => $user->id);
-            $table->data[] = $row;
+            $loading_div = "<div class='loadingDiv' style='display: none;'><img width='32' height='32' src='images/Spinner.gif'/></div>$status";
+            //Dont show if grade is already transferred
+            if ($confirm_item->outcomeid != 1) {
+                $row = new html_table_row(array(
+                    fullname($user),
+                    $this->display_grade($confirm_item),
+                    $graded,
+                    $loading_div
+                ));
+                $row->attributes = array("class" => "", "data-moodle-user-id" => $user->id);
+                $table->data[] = $row;
+            }
         }
 
         $output = html_writer::table($table);
@@ -397,7 +401,6 @@ class gradereport_transfer_renderer extends plugin_renderer_base
         $output .= '<button class="btn btn-success" id = "proceed_grade_transfer" type="submit">' . get_string('proceedwithtransfer', 'gradereport_transfer') . '</button>';
         $output .= ' <a id = "cancel_grade_transfer" href="javascript:history.back()" class="btn btn-danger">' . get_string('canceltransfer', 'gradereport_transfer') . '</a>';
         $output .= '</form>';
-
         return $output;
     }
 
