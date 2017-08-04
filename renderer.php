@@ -46,7 +46,7 @@ class gradereport_transfer_renderer extends plugin_renderer_base
      * @return string
      */
     public function selected_mapping_overview($transfer_report) {
-        global $CFG, $DB;
+        global $CFG, $DB,$OUTPUT;
 
         $edit_page_url = $CFG->wwwroot . '/course/modedit.php?update=' . $transfer_report->selected->coursemoduleid;
         $grades_page_url = $CFG->wwwroot . '/mod/' . $transfer_report->selected->moodle_activity_type . '/view.php?id=' . $transfer_report->selected->coursemoduleid . '&action=grading';
@@ -84,11 +84,11 @@ class gradereport_transfer_renderer extends plugin_renderer_base
         $table->attributes['class'] = 'generaltable';
 
         $table->data[] = array(
-            get_string('mappingitem', 'gradereport_transfer'),
+            get_string('mappingitem', 'gradereport_transfer').$OUTPUT->help_icon('samis_assessment_name','gradereport_transfer'),
             '<strong>' . $transfer_report->selected->samis_assessment_name . '<strong>' . $warning
         );
         $table->data[] = array(
-            get_string('mappingreference', 'gradereport_transfer'),
+            get_string('mappingreference', 'gradereport_transfer').$OUTPUT->help_icon('samis_code','gradereport_transfer'),
             $transfer_report->selected->samis_assessment_id
         );
         $table->data[] = array(
@@ -100,26 +100,26 @@ class gradereport_transfer_renderer extends plugin_renderer_base
             $transfer_report->selected->periodslotcode
         );
         $table->data[] = array(
-            get_string('moodleactivitytype', 'gradereport_transfer'),
+            get_string('moodleactivitytype', 'gradereport_transfer').$OUTPUT->help_icon('moodle_activity_type','gradereport_transfer'),
             $transfer_report->selected->moodle_activity_type
         );
         $table->data[] = array(
-            get_string('moodleactivityname', 'gradereport_transfer'),
+            get_string('moodleactivityname', 'gradereport_transfer').$OUTPUT->help_icon('moodle_activity_name','gradereport_transfer'),
             '<strong>' . $transfer_report->selected->moodle_activity_name . '</strong> (<a href="' . $edit_page_url . '">' . get_string('editsettings') . '</a>)'
         );
         $table->data[] = array(
-            get_string('moodleactivitycompletion', 'gradereport_transfer'),
+            get_string('moodleactivitycompletion', 'gradereport_transfer').$OUTPUT->help_icon('moodle_activity_completion','gradereport_transfer'),
             'Currently ' . $activity_progress->graded . ' out of 
                 ' . $activity_progress->total . ' have been graded, 
                 ' . $activity_progress->transferred . ' have been transferred to SAMIS. 
                 (<strong><a href="' . $grades_page_url . '">click here to see current grades</a></strong>)'
         );
         $table->data[] = array(
-            get_string('transferstatus', 'gradereport_transfer'),
+            get_string('transferstatus', 'gradereport_transfer').$OUTPUT->help_icon('transfer_status','gradereport_transfer'),
             $status
         );
         $table->data[] = array(
-            get_string('mappingdetails', 'gradereport_transfer'),
+            get_string('mappingdetails', 'gradereport_transfer').$OUTPUT->help_icon('transfer_mapping_details','gradereport_transfer'),
             $user_action . fullname($user_modifier) . " on " . userdate($transfer_report->selected->timemodified)
         );
 

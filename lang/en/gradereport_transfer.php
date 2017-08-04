@@ -24,8 +24,8 @@
  */
 
 $string['pluginname'] = 'Grade transfer';
-$string['mappingitem'] = 'SAMIS assessment';
-$string['mappingreference'] = 'SAMIS Code';
+$string['mappingitem'] = 'SAMIS assessment Name';
+$string['mappingreference'] = 'SAMIS Assessment Code';
 $string['mappingcategory'] = 'Period Slot Code';
 $string['datefrom'] = 'Submission date after';
 $string['dateto'] = 'Submission date before';
@@ -74,3 +74,21 @@ $string['eventgradereportviewed'] = 'Grade transfer report viewed';
 $string['eventgradereporttransfer'] = 'Grade transfer triggered';
 $string['onlymappedassessments'] = 'Only mapped assessments are listed';
 $string['canceltransfer']= 'Cancel';
+
+//HELP ICONS
+
+$string['samis_code_help'] = 'Internal use only';
+$string['samis_code'] = 'SAMIS Assessment Code';
+$string['samis_assessment_name_help'] = 'SAMIS Assessment Name from MAB table in SAMIS';
+$string['samis_assessment_name'] = 'SAMIS Assessment Name';
+$string['samis_code'] = 'SAMIS Assessment Code';
+$string['moodle_activity_type_help'] = 'Type of Moodle Activity to send grades for';
+$string['moodle_activity_type'] = 'Moodle Activity Type';
+$string['moodle_activity_completion_help'] = 'Status of the number of students graded in a given activity and grades that have been transferred to SAMIS';
+$string['moodle_activity_completion'] = 'Moodle Activity Completion';
+$string['moodle_activity_name_help'] = 'Name of the Moodle Activity against which the SAMIS assessment is mapped';
+$string['moodle_activity_name'] = 'Moodle Activity Name';
+$string['transfer_mapping_details_help'] = 'Transfer Mapping details set on the Activity Settings page';
+$string['transfer_mapping_details'] = 'Transfer Mapping details';
+$string['transfer_status_help'] = 'Status of your transfer';
+$string['transfer_status'] = 'Transfer Status';

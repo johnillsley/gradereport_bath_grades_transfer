@@ -1,14 +1,20 @@
 define(['jquery', 'core/templates', 'core/ajax', 'core/config', 'core/yui'], function ($, templates, ajax, config, Y) {
     var URL = config.wwwroot + '/grade/report/transfer/ajax.php';
     //Show an end summary of grades transferred and failed.
-    var endSummary = function (data) {
-        var success_transfers_count = data.success;
+    var endSummary = function (data, total_time) {
+         var success_transfers_count = data.success;
         var failed_transfers_count = data.failed;
-        var succcess_transfer_text = "Grades sent to SAMIS successfully : <span class='label-info label'>" + success_transfers_count + "</span>";
+        var succcess_transfer_text = "Grades sent to SAMIS successfully : <span class='label-success label'>" + success_transfers_count + "</span>";
         var failed_transfer_text = "Failed transfers : <span class='label-danger label'>" + failed_transfers_count + "</span>";
+        var total_text = "Total : <span class='label-info label'>" + (success_transfers_count + failed_transfers_count) + "</span>";
         var yuiDialogue = new M.core.dialogue({
             headerContent: 'Summary',
-            bodyContent: "<p>" + succcess_transfer_text + "</p>" + "<p>" + failed_transfer_text + "</p>",
+            bodyContent: "<div id='transfer_summary'>" +
+            "<p>" + succcess_transfer_text + "</p>"
+            + "<p>" + failed_transfer_text + "</p>"
+            + "<p>" + total_text + "</p>"
+            + "<p>Total time taken: " + total_time + "s</p>"
+            +"</div>",
             draggable: false,
             visible: false,
             center: true,
@@ -27,7 +33,7 @@ define(['jquery', 'core/templates', 'core/ajax', 'core/config', 'core/yui'], fun
         });
         yuiDialogue.show();
     };
-    var sendSingleGrade = function (users, data_json, succ_count, failed_count) {
+    var sendSingleGrade = function (users, data_json, succ_count, failed_count, startTime) {
         var single_user = users[0];
         var tr_node = $('#confirm_transfer_table tbody').find("tr[data-moodle-user-id='" + single_user + "']");
         var loading_div = tr_node.find('td').find('.loadingDiv');
@@ -83,14 +89,21 @@ define(['jquery', 'core/templates', 'core/ajax', 'core/config', 'core/yui'], fun
             //console.log("Spliced...");
             //Re-run the function
             if (users.length > 0) {
-                sendSingleGrade(users, data_json, succ_count, failed_count);
+                sendSingleGrade(users, data_json, succ_count, failed_count,startTime);
             }
             else {
+                var endTime = new Date().getTime();
+                console.log("Start time again:");
+                console.log(startTime);
+                console.log("END TIME: "+endTime);
                 $("body").css("cursor", "default");
                 var total_count = {'success': succ_count, 'failed': failed_count};
-                endSummary(total_count);
+                var total_time = (endTime - startTime);
+                total_time /= 1000;
+                //var total_time_seconds = Math.round(total_time % 60);
+                //console.log(total_time_seconds);
+                endSummary(total_count, total_time);
             }
-
         });
 
     };
@@ -106,8 +119,9 @@ define(['jquery', 'core/templates', 'core/ajax', 'core/config', 'core/yui'], fun
         e.preventDefault();
         //disable the button
         $(node).attr('disabled', true);
+        var form = $('#transferconfirmed');
         var data = form.serializeArray();
-        $(node).next().html('Go Back').attr('href', config.wwwroot + '/grade/report/transfer/index.php?id=' + data[3].value);
+        $(node).next().html('Go Back').attr('href', config.wwwroot + '/grade/report/transfer/index.php?id=' + data[3].value + '&mappingid=' + data[4].value);
         $("body").css("cursor", "progress");
         $('#confirm_transfer_table .transfer_status')
             .removeClass()
@@ -118,14 +132,15 @@ define(['jquery', 'core/templates', 'core/ajax', 'core/config', 'core/yui'], fun
         //var promise = $.Deferred();
         var parent_tr_nodes = $('#confirm_transfer_table tbody tr');
 
-        var form = $('#transferconfirmed');
 
         //console.log(data);
         var users = getUsers(parent_tr_nodes);
         //Now that I have the users, get the first one in the index.
         var success_transferred_count = 0;
         var failed_transferred_count = 0;
-        sendSingleGrade(users, data, success_transferred_count, failed_transferred_count);
+        var timestart = new Date().getTime();
+        console.log("START TIME:"+timestart);
+        sendSingleGrade(users, data, success_transferred_count, failed_transferred_count, timestart);
     };
     return {
         init: function () {
