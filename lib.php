@@ -350,14 +350,9 @@ class transfer_report extends \grade_report
      */
     public function do_transfers($transfer_list = array()) {
         // Require local plugin class
-
         $grade_transfers = new \local_bath_grades_transfer();
         $responses = $grade_transfers->transfer_mapping($this->id, $transfer_list);
         return $responses;
-
-        //todo - remove function below to transfer grades
-        //$grade_transfers = new \gradereport_transfer\grade_report_transfer_grade_transfer( $this->selected );
-        //$grade_transfers->prepare_grade_transfer($transfer_list);
     }
 
     /**
