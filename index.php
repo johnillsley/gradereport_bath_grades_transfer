@@ -134,13 +134,9 @@ if ($confirmtransfer == 1 && !empty($dotransfer)) {
     $transfer_list = $transfer_report->get_transfer_list($dotransfer);
     $transfer_outcomes = $transfer_report->do_transfers($transfer_list);
     //Show me the outcomes
-
-
     foreach ($transfer_outcomes as $transfer_status) {
         echo $output->render_transfer_status($transfer_status);
     }
-
-    // redirect("index.php?id=".$course->id."&mappingid=".$transfer_report->id, "Transfers processed");
 }
 
 $buttons = false;
@@ -152,15 +148,13 @@ if (!empty($outcome_output)) {
 }
 if ($confirmtransfer == 0 && !empty($dotransfer)) {
     $transfer_list = $transfer_report->get_transfer_list($dotransfer);
-    echo get_string('transferconfirmheading', 'gradereport_transfer') . "<h5>" . $transfer_report->selected->samis_assessment_name . "</h5>";
+    //echo get_string('transferconfirmheading', 'gradereport_transfer') . "<h5>" . $transfer_report->selected->samis_assessment_name . "</h5>";
     echo $output->confirm_transfers($transfer_report, $transfer_list, $dotransfer);
 }
 // END PROCESS GRADE TRANSFER
 
 $grade_transfer = new \local_bath_grades_transfer();
 $course_has_samis_code = $grade_transfer->samis_mapping_exists($course->id);
-$course_has_samis_code = true; //TODO - remove this
-
 if (empty($dotransfer)) {
 
     if ($course_has_samis_code) {
@@ -202,14 +196,9 @@ if (empty($dotransfer)) {
             echo '<input type="hidden" name="mappingid" value="' . $transfer_report->id . '" />';
             echo '<input type="hidden" name="dotransfer" value="selected" />';
             echo '<input type="hidden" name="returnto" value="' . s($PAGE->url->out(false)) . '" />';
-
             echo "<h5>" . get_string('transferlog', 'gradereport_transfer') . " (" . get_string('transferstatus' . $transferstatus, 'gradereport_transfer') . ")</h5>";
-
             $output->grade_transfer_table($transfer_report);
-
             if ($output->bulk_actions && $output->valid_mapping) echo $output->table_bulk_actions();
-
-            //echo '</div>';
             echo '</form>';
 
             echo $output->table_name_search_form($transfer_report, $baseurl);
