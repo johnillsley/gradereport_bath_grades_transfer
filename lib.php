@@ -232,6 +232,7 @@ class transfer_report extends \grade_report
               AND sm.period_code = gl.periodslotcode
             WHERE ( gl.expired IS NULL OR gl.expired = 0 OR EXISTS ( SELECT 1 FROM {local_bath_grades_log} AS l WHERE l.gradetransfermappingid = gl.id ) )
             /* grade lookup is current or if expired some tranfers happened that might be of interest to user */
+            AND gm.expired = 0 -- to show non-expired mappings only
             AND cm.course = ? " . $year_sql,
             $params
         );
