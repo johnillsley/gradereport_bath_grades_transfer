@@ -46,7 +46,7 @@ class gradereport_transfer_renderer extends plugin_renderer_base
      * @return string
      */
     public function selected_mapping_overview($transfer_report) {
-        global $CFG, $DB,$OUTPUT;
+        global $CFG, $DB, $OUTPUT;
 
         $edit_page_url = $CFG->wwwroot . '/course/modedit.php?update=' . $transfer_report->selected->coursemoduleid;
         $grades_page_url = $CFG->wwwroot . '/mod/' . $transfer_report->selected->moodle_activity_type . '/view.php?id=' . $transfer_report->selected->coursemoduleid . '&action=grading';
@@ -84,11 +84,11 @@ class gradereport_transfer_renderer extends plugin_renderer_base
         $table->attributes['class'] = 'generaltable';
 
         $table->data[] = array(
-            get_string('mappingitem', 'gradereport_transfer').$OUTPUT->help_icon('samis_assessment_name','gradereport_transfer'),
+            get_string('mappingitem', 'gradereport_transfer') . $OUTPUT->help_icon('samis_assessment_name', 'gradereport_transfer'),
             '<strong>' . $transfer_report->selected->samis_assessment_name . '<strong>' . $warning
         );
         $table->data[] = array(
-            get_string('mappingreference', 'gradereport_transfer').$OUTPUT->help_icon('samis_code','gradereport_transfer'),
+            get_string('mappingreference', 'gradereport_transfer') . $OUTPUT->help_icon('samis_code', 'gradereport_transfer'),
             $transfer_report->selected->samis_assessment_id
         );
         $table->data[] = array(
@@ -100,26 +100,26 @@ class gradereport_transfer_renderer extends plugin_renderer_base
             $transfer_report->selected->periodslotcode
         );
         $table->data[] = array(
-            get_string('moodleactivitytype', 'gradereport_transfer').$OUTPUT->help_icon('moodle_activity_type','gradereport_transfer'),
+            get_string('moodleactivitytype', 'gradereport_transfer') . $OUTPUT->help_icon('moodle_activity_type', 'gradereport_transfer'),
             $transfer_report->selected->moodle_activity_type
         );
         $table->data[] = array(
-            get_string('moodleactivityname', 'gradereport_transfer').$OUTPUT->help_icon('moodle_activity_name','gradereport_transfer'),
+            get_string('moodleactivityname', 'gradereport_transfer') . $OUTPUT->help_icon('moodle_activity_name', 'gradereport_transfer'),
             '<strong>' . $transfer_report->selected->moodle_activity_name . '</strong> (<a href="' . $edit_page_url . '">' . get_string('editsettings') . '</a>)'
         );
         $table->data[] = array(
-            get_string('moodleactivitycompletion', 'gradereport_transfer').$OUTPUT->help_icon('moodle_activity_completion','gradereport_transfer'),
+            get_string('moodleactivitycompletion', 'gradereport_transfer') . $OUTPUT->help_icon('moodle_activity_completion', 'gradereport_transfer'),
             'Currently ' . $activity_progress->graded . ' out of 
                 ' . $activity_progress->total . ' have been graded, 
                 ' . $activity_progress->transferred . ' have been transferred to SAMIS. 
                 (<strong><a href="' . $grades_page_url . '">click here to see current grades</a></strong>)'
         );
         $table->data[] = array(
-            get_string('transferstatus', 'gradereport_transfer').$OUTPUT->help_icon('transfer_status','gradereport_transfer'),
+            get_string('transferstatus', 'gradereport_transfer') . $OUTPUT->help_icon('transfer_status', 'gradereport_transfer'),
             $status
         );
         $table->data[] = array(
-            get_string('mappingdetails', 'gradereport_transfer').$OUTPUT->help_icon('transfer_mapping_details','gradereport_transfer'),
+            get_string('mappingdetails', 'gradereport_transfer') . $OUTPUT->help_icon('transfer_mapping_details', 'gradereport_transfer'),
             $user_action . fullname($user_modifier) . " on " . userdate($transfer_report->selected->timemodified)
         );
 
@@ -342,46 +342,57 @@ class gradereport_transfer_renderer extends plugin_renderer_base
      */
     public function confirm_transfers($transfer_report, $transfer_list, $dotransfer) {
         global $DB, $PAGE;
-
+        $will_be_transferred_count = $no_grade_to_transfer_count = 0;
         $confirm_list = $transfer_report->confirm_list($transfer_list);
-
         $table = new html_table();
         $table->id = 'confirm_transfer_table';
-        $table->attributes['class'] = 'generaltable';
+        $table->attributes['class'] = 'generaltable table-bordered';
         $table->head = array(
             get_string('fullnameuser'),
             get_string('grade'),
             get_string('lastgraded', 'gradereport_transfer'),
             get_string('transferstatus', 'gradereport_transfer')
         );
-
         foreach ($confirm_list as $confirm_item) {
             $user = $DB->get_record('user', array('id' => $confirm_item->userid));
             $graded = (empty($confirm_item->timegraded)) ? get_string('notgraded', 'question') : userdate($confirm_item->timegraded);
             if ($confirm_item->outcomeid == 1) {
                 $status = '<span class="label label-warning transfer_status">' . get_string('alreadytransferred', 'gradereport_transfer') . '</span>';
             } elseif (empty($confirm_item->finalgrade)) {
+                $no_grade_to_transfer_count++;
                 $status = '<span class="label label-warning transfer_status">' . get_string('nogradetotransfer', 'gradereport_transfer') . '</span>';
             } elseif ($confirm_item->rawgrademax != MAX_GRADE) {
                 $status = '<span class="label label-danger transfer_status">' . get_string('wrongmaxgrade', 'gradereport_transfer') . '</span>';
             } else {
+                $will_be_transferred_count++;
                 $status = '<span class="label label-success transfer_status">' . get_string('willbetransferred', 'gradereport_transfer') . '</span>';
             }
             $loading_div = "<div class='loadingDiv' style='display: none;'><img width='32' height='32' src='images/Spinner.gif'/></div>$status";
             //Dont show if grade is already transferred
-            if ($confirm_item->outcomeid != 1) {
-                $row = new html_table_row(array(
-                    fullname($user),
-                    $this->display_grade($confirm_item),
-                    $graded,
-                    $loading_div
-                ));
-                $row->attributes = array("class" => "", "data-moodle-user-id" => $user->id);
-                $table->data[] = $row;
-            }
+            /*if ($confirm_item->outcomeid != 1) {*/
+            $row = new html_table_row(array(
+                fullname($user),
+                $this->display_grade($confirm_item),
+                $graded,
+                $loading_div
+            ));
+            $row->attributes = array("class" => "", "data-moodle-user-id" => $user->id);
+            $table->data[] = $row;
+            /*}*/
         }
 
-        $output = html_writer::table($table);
+        $output = "<div class=\"spotlight spotlight-v2\">
+<i class=\"fa fa-file-text fa-4x pull-left\" style=\"color:#38b9ec;\"></i>
+<h3>" . $transfer_report->selected->samis_assessment_name . "</h3>
+<h5>
+Any instructions go here<br>
+</h5>
+<ul class=\"list-style-1 colored\">
+<li>Will be transferred: <span class=\"badge\">$will_be_transferred_count</span></li>
+<li>No grade to transfer: <span class=\"badge\"> $no_grade_to_transfer_count</span></li>
+</ul>
+</div>";
+        $output .= html_writer::table($table);
 
         $output .= '<form action="index.php" method="post" id="transferconfirmed">';
         $output .= '<input type="hidden" name="confirmtransfer" value="1" />';
@@ -393,7 +404,7 @@ class gradereport_transfer_renderer extends plugin_renderer_base
             //$userids = $transfer_report->get_transfer_list("selected");
             foreach ($transfer_list as $userid) {
                 //$output .= '<input type="hidden" name="user'.$userid.'" value="on" />';
-                $output .= '<input type="hidden" name="user[]" value="' . $userid . '" />';
+                //$output .= '<input type="hidden" name="user[]" value="' . $userid . '" />';
             }
         }
         //$output .= '<input type="hidden" name="returnto" value="'.s($PAGE->url->out(false)).'" />'; // TODO value
