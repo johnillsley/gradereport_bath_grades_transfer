@@ -92,3 +92,7 @@ $string['transfer_mapping_details_help'] = 'Transfer Mapping details set on the 
 $string['transfer_mapping_details'] = 'Transfer Mapping details';
 $string['transfer_status_help'] = 'Status of your transfer';
 $string['transfer_status'] = 'Transfer Status';
+
+//EVENTS
+$string['gradereport_transfer_queue'] = 'Grade Transfer Queue';
+$string['processqueuedgrades'] = 'Process Queued Grades to Transfer';
