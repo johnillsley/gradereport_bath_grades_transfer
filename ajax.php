@@ -4,6 +4,7 @@ require_once(dirname(__FILE__) . '/../../../config.php');
 require_once $CFG->dirroot . '/grade/report/transfer/lib.php';
 require_once $CFG->libdir . '/gradelib.php';
 require_once $CFG->dirroot . '/grade/lib.php';
+require_once($CFG->dirroot . '/grade/report/transfer/classes/task/process_grade.php');
 $timenow = time();
 require_sesskey();
 
@@ -19,10 +20,25 @@ $gpr = new grade_plugin_return(array('type' => 'report', 'plugin' => 'transfer',
 $transfer_report = new \gradereport_transfer\transfer_report($courseid, $gpr, $context, $mappingid);
 if ($confirmtransfer == 1 && !empty($dotransfer)) {
     //$transfer_list = $transfer_report->get_transfer_list($dotransfer);
-    $transfer_outcomes = $transfer_report->do_transfers($users);
-    if (!empty($transfer_outcomes)) {
-        echo json_encode($transfer_outcomes);
-    }
+    //Create a queue event
+    $event = \gradereport_transfer\event\grade_report_queue_grade_transfer::create(
+        array(
+            'context' => $context,
+            'courseid' => $courseid,
+            'other' => array(
+                'mappingid' => $mappingid,
+                'users' => $users
+            ),
+        )
+    );
+    $event->trigger();
+    //come back to the user saying , grade is being processed !
+    $transfer_status = new \gradereport_transfer\output\transfer_status($users[0], 'queued', null, "Added to ADHOC QUEUE");
+    echo json_encode($transfer_status);
+    //$transfer_outcomes = $transfer_report->do_transfers($users);
+    //if (!empty($transfer_outcomes)) {
+    //    echo json_encode($transfer_outcomes);
+    //
 
 }
 
