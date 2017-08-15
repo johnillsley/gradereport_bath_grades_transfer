@@ -91,14 +91,14 @@ class transfer_report extends \grade_report
         /***** get the grade transfer mapping *****/
         FROM {local_bath_grades_mapping} gm
         JOIN {local_bath_grades_lookup} gl
-            ON gl.id = gm.assessment_lookup_id
+            ON gl.id = gm.assessmentlookupid
             -- AND gl.expired IS NULL  -- need to show transfer history if mapping becomes expired
 
        /***** join students that have equivalent sits mapping *****/
         JOIN {sits_mappings} sm
-            ON sm.acyear = gl.academic_year
+            ON sm.acyear = gl.academicyear
             AND sm.period_code = gl.periodslotcode
-            AND sm.sits_code = gl.samis_unit_code
+            AND sm.sits_code = gl.samisunitcode
             AND sm.active = 1
             AND sm.default_map = 1
         JOIN {sits_mappings_enrols} me ON me.map_id = sm.id
@@ -172,9 +172,9 @@ class transfer_report extends \grade_report
 
         $years = array();
         $options = $DB->get_records_sql(
-            "SELECT DISTINCT academic_year FROM {local_bath_grades_lookup} ORDER BY academic_year DESC");
+            "SELECT DISTINCT academicyear FROM {local_bath_grades_lookup} ORDER BY academicyear DESC");
         foreach ($options as $option) {
-            $years[substr($option->academic_year, 0, 4)] = $option->academic_year;
+            $years[substr($option->academicyear, 0, 4)] = $option->academicyear;
         }
         return $years;
     }
@@ -207,28 +207,28 @@ class transfer_report extends \grade_report
             , gm.timemodified
             , gm.modifierid
             , gm.locked
-            , gm.samis_assessment_end_date
+            , gm.samisassessmentenddate
             , gl.id AS 'assessmentlookupid'
-            , gl.samis_assessment_id
-            , gl.mab_name AS 'samis_assessment_name'
-            , gl.academic_year
+            , gl.samisassessmentid
+            , gl.mabname AS 'samis_assessment_name'
+            , gl.academicyear
             , gl.occurrence
-            , gl.mab_seq
+            , gl.mabseq
             , gl.periodslotcode
             , gl.expired
             , cm.course
             , cm.id AS 'coursemoduleid'
             , cm.instance
-            , gm.activity_type AS 'moodle_activity_type'
+            , gm.activitytype AS 'moodle_activity_type'
             FROM {local_bath_grades_mapping} gm
-            JOIN {local_bath_grades_lookup} gl ON gl.id = gm.assessment_lookup_id
+            JOIN {local_bath_grades_lookup} gl ON gl.id = gm.assessmentlookupid
             JOIN {course_modules} cm ON cm.id = gm.coursemodule
             JOIN {sits_mappings} sm
-              ON sm.sits_code = gl.samis_unit_code
+              ON sm.sits_code = gl.samisunitcode
               AND sm.courseid = cm.course
               AND sm.default_map = 1
               AND sm.active = 1
-              AND sm.acyear = gl.academic_year
+              AND sm.acyear = gl.academicyear
               AND sm.period_code = gl.periodslotcode
             WHERE ( gl.expired IS NULL OR gl.expired = 0 OR
              EXISTS ( SELECT 1 FROM {local_bath_grades_log} l WHERE l.gradetransfermappingid = gl.id ) )
@@ -248,7 +248,7 @@ class transfer_report extends \grade_report
 
             // Drop down menu options for mapped external assessments.
             $optionexternalstr = $mapping->samis_assessment_name .
-                ' (' . $mapping->academic_year . ' - ' . $mapping->periodslotcode . ') ' . $mapping->mab_seq;
+                ' (' . $mapping->academicyear . ' - ' . $mapping->periodslotcode . ') ' . $mapping->mabseq;
             $optionsexternal[$mapping->id] = $optionexternalstr;
             $moodlemodule = $DB->get_record($mapping->moodle_activity_type, array('id' => $mapping->instance));
             $mapping->moodle_activity_name = $moodlemodule->name;
