@@ -4,7 +4,7 @@ define(['jquery', 'core/templates', 'core/ajax', 'core/config', 'core/yui'], fun
     var endSummary = function (data, total_time) {
         var success_transfers_count = data.success;
         var failed_transfers_count = data.failed;
-        var succcess_transfer_text = "Grades sent to SAMIS successfully :" +
+        var succcess_transfer_text = "Grades successfully queued :" +
             " <span class='label-success label'>"
             + success_transfers_count + "</span>";
         var failed_transfer_text = "Failed transfers : <span class='label-danger label'>" + failed_transfers_count + "</span>";

@@ -32,14 +32,14 @@ defined('MOODLE_INTERNAL') || die();
  * @uses \core\event\base
  * @package grade_report_bath_transfer
  */
-class grade_report_queue_grade_transfer extends \core\event\base {
+class grade_report_queue_grade_transfer extends \core\event\base
+{
 
     /**
      * Initialise the event data.
      * @return void
      */
     protected function init() {
-        //parent::init();
         $this->data['crud'] = 'c';
         $this->data['edulevel'] = self::LEVEL_OTHER;
     }
@@ -59,7 +59,6 @@ class grade_report_queue_grade_transfer extends \core\event\base {
      * @return string
      */
     public function get_description() {
-        //return "The user with id '$this->userid' initiated grade transfers for the assessment ".$this->other['assessment_name'];
         return "Grade for userid $this->other['users'] has been queued by $this->userid";
     }
 
@@ -69,6 +68,6 @@ class grade_report_queue_grade_transfer extends \core\event\base {
      */
     public function get_url() {
         $url = '/grade/report/' . $this->reporttype . '/index.php';
-        return new \moodle_url($url, array('id' => $this->courseid, 'mappingid' => $this->other['mappingid'] ));
+        return new \moodle_url($url, array('id' => $this->courseid, 'mappingid' => $this->other['mappingid']));
     }
 }

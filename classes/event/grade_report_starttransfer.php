@@ -32,7 +32,8 @@ defined('MOODLE_INTERNAL') || die();
  * @uses \core\event\grade_report_viewed
  * @package grade_report_bath_transfer
  */
-class grade_report_starttransfer extends \core\event\grade_report_viewed {
+class grade_report_starttransfer extends \core\event\grade_report_viewed
+{
 
     /**
      * Initialise the event data.
@@ -59,7 +60,7 @@ class grade_report_starttransfer extends \core\event\grade_report_viewed {
      * @return string
      */
     public function get_description() {
-        return "The user with id '$this->userid' initiated grade transfers for the assessment ".$this->other['assessment_name'];
+        return "The user with id '$this->userid' initiated grade transfers for the assessment " . $this->other['assessment_name'];
     }
 
     /**
@@ -68,6 +69,6 @@ class grade_report_starttransfer extends \core\event\grade_report_viewed {
      */
     public function get_url() {
         $url = '/grade/report/' . $this->reporttype . '/index.php';
-        return new \moodle_url($url, array('id' => $this->courseid, 'mappingid' => $this->other['mappingid'] ));
+        return new \moodle_url($url, array('id' => $this->courseid, 'mappingid' => $this->other['mappingid']));
     }
 }
