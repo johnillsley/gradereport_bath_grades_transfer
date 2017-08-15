@@ -33,7 +33,6 @@ require_login($courseid);
 $gpr = new grade_plugin_return(array('type' => 'report', 'plugin' => 'transfer', 'courseid' => $courseid));
 $transferreport = new \gradereport_transfer\transfer_report($courseid, $gpr, $context, $mappingid);
 if ($confirmtransfer == 1 && !empty($dotransfer)) {
-    // $transfer_list = $transferreport->get_transfer_list($dotransfer);.
     // Create a queue event.
     $event = \gradereport_transfer\event\grade_report_queue_grade_transfer::create(
         array(
@@ -49,11 +48,6 @@ if ($confirmtransfer == 1 && !empty($dotransfer)) {
     // Come back to the user saying , grade is being processed !.
     $transferstatus = new \gradereport_transfer\output\transfer_status($users[0], 'queued', null, "Added to ADHOC QUEUE");
     echo json_encode($transferstatus);
-    //$transfer_outcomes = $transferreport->do_transfers($users);
-    //if (!empty($transfer_outcomes)) {
-    //    echo json_encode($transfer_outcomes);
-    //
-
 }
 
 
