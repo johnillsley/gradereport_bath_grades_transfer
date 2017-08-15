@@ -48,19 +48,12 @@ define(['jquery', 'core/templates', 'core/ajax', 'core/config', 'core/yui'], fun
         });
         var usr_obj = {'name': 'users[]', 'value': single_user};
         data_json.push(usr_obj);
-        //console.log(data_json);
-        //console.log("sending grade for :" + single_user);
         $.ajax({
             type: 'POST',
             dataType: 'json',
             data: data_json,
             url: URL
         }).done(function (transfer_status) {
-            // $.each( transfer_status,function(index,value){
-            //$.each( parent_tr_nodes,function(i,tr_node) {
-            //var node_user_value = $(tr_node).attr('data-moodle-user-id');
-            //console.log("Node user val:"+node_user_value);
-            //console.log("Userid val:"+transfer_status.userid);
             console.log(transfer_status);
             if (tr_node.attr('data-moodle-user-id') == transfer_status.userid) {
                 //console.log("YEs I found a target..Applying it");
