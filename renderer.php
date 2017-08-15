@@ -47,7 +47,6 @@ class gradereport_transfer_renderer extends plugin_renderer_base
      */
     public function selected_mapping_overview($transferreport) {
         global $CFG, $DB, $OUTPUT;
-
         $editpageurl = $CFG->wwwroot . '/course/modedit.php?update=' . $transferreport->selected->coursemoduleid;
         $gradespageurl = $CFG->wwwroot . '/mod/' .
             $transferreport->selected->moodle_activity_type .
@@ -66,7 +65,7 @@ class gradereport_transfer_renderer extends plugin_renderer_base
 
         // Current status indicator
         if ($this->validmapping === false) { // TODO - USE CLASS IN LOCAL PLUGIN TO CHECK IF MAPPING IS VALID
-            // Transfer mapping no longer valid
+            // Transfer mapping no longer valid.
             $status = '<span class="label label-danger">' . get_string('mappingnotvalid', 'gradereport_transfer') . '</span> ';
             $status .= '<strong><a href="' . $editpageurl . '">' .
                 get_string('reconfiguremapping', 'gradereport_transfer') . '</a></strong>';
@@ -100,11 +99,11 @@ class gradereport_transfer_renderer extends plugin_renderer_base
         );
         $table->data[] = array(
             get_string('mappingreference', 'gradereport_transfer') . $OUTPUT->help_icon('samis_code', 'gradereport_transfer'),
-            $transferreport->selected->samis_assessment_id
+            $transferreport->selected->samisassessmentid
         );
         $table->data[] = array(
             get_string('academicyear', 'gradereport_transfer'),
-            $transferreport->selected->academic_year
+            $transferreport->selected->academicyear
         );
         $table->data[] = array(
             get_string('mappingcategory', 'gradereport_transfer'),
