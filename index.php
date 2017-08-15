@@ -161,7 +161,7 @@ if (empty($dotransfer)) {
         // FILTER FORM.
         $params['course'] = $course;
         $params['years'] = $transferreport->get_academic_year_options(); // TODO - NEED TO MOVE THIS ABOVE THIS FORM
-        $params['mappingids'] = $transferreport->external_assessment; // Use $transferreport->moodle_activity for moodle list
+        $params['mappingids'] = $transferreport->externalassessment; // Use $transferreport->moodle_activity for moodle list
         $params['selected_mapping'] = $mappingid;
         $params['transferstatus'] = $transferreport->get_status_options();
         $params['selected_status'] = $transferstatus;
@@ -195,7 +195,9 @@ if (empty($dotransfer)) {
             echo "<h5>" . get_string('transferlog', 'gradereport_transfer') .
                 " (" . get_string('transferstatus' . $transferstatus, 'gradereport_transfer') . ")</h5>";
             $output->grade_transfer_table($transferreport);
-            if ($output->bulk_actions && $output->valid_mapping) echo $output->table_bulk_actions();
+            if ($output->bulkactions && $output->validmapping) {
+                echo $output->table_bulk_actions();
+            }
             echo '</form>';
 
             echo $output->table_name_search_form($transferreport, $baseurl);
