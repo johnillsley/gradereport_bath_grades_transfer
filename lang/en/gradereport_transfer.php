@@ -73,9 +73,10 @@ $string['courseisnotmapped'] = 'This course does not have a valid SAMIS mapping 
 $string['eventgradereportviewed'] = 'Grade transfer report viewed';
 $string['eventgradereporttransfer'] = 'Grade transfer triggered';
 $string['onlymappedassessments'] = 'Only mapped assessments are listed';
-$string['canceltransfer']= 'Cancel';
+$string['canceltransfer'] = 'Cancel';
+$string['nocapabilitytotransfer'] = 'Your role does not have the capaiblity to transfer grades';
 
-//HELP ICONS
+// HELP ICONS.
 
 $string['samis_code_help'] = 'Internal use only';
 $string['samis_code'] = 'SAMIS Assessment Code';
@@ -92,3 +93,6 @@ $string['transfer_mapping_details_help'] = 'Transfer Mapping details set on the 
 $string['transfer_mapping_details'] = 'Transfer Mapping details';
 $string['transfer_status_help'] = 'Status of your transfer';
 $string['transfer_status'] = 'Transfer Status';
+// EVENTS.
+$string['gradereport_transfer_queue'] = 'Grade Transfer Queue';
+$string['processqueuedgrades'] = 'Process Queued Grades to Transfer';

@@ -24,7 +24,7 @@
  */
 
 namespace gradereport_transfer;
-
+defined('MOODLE_INTERNAL') || die();
 require_once($CFG->dirroot . '/grade/report/lib.php');
 require_once($CFG->dirroot . '/grade/report/transfer/classes/grade_transfer.php');
 require_once($CFG->dirroot . '/local/bath_grades_transfer/lib.php');
@@ -44,11 +44,11 @@ class transfer_report extends \grade_report
     /**
      * @var FROM part of SQL used by class methods.
      */
-    private $sql_from;
+    private $sqlfrom;
     /**
      * @var FROM parameters for all SQL in class.
      */
-    private $sql_params = array();
+    private $sqlparams = array();
     /**
      * @var the count of number of users on the transfer log report after name search and initials filters are applied.
      */
@@ -62,12 +62,12 @@ class transfer_report extends \grade_report
     /**
      * @array the currently mapped moodle activities on the course
      */
-    public $moodle_activity = array();
+    public $moodleactivity = array();
 
     /**
      * @array the currently mapped external assessments on the course
      */
-    public $external_assessment = array();
+    public $externalassessment = array();
 
     /**
      * @object the currently selected mapping to be displayed on the report
@@ -87,34 +87,34 @@ class transfer_report extends \grade_report
         parent::__construct($courseid, $gpr, $context);
 
         $this->id = $mappingid;
-        $this->sql_from = "
+        $this->sqlfrom = "
         /***** get the grade transfer mapping *****/
-        FROM {local_bath_grades_mapping} AS gm
-        JOIN {local_bath_grades_lookup} AS gl
-            ON gl.id = gm.assessment_lookup_id
+        FROM {local_bath_grades_mapping} gm
+        JOIN {local_bath_grades_lookup} gl
+            ON gl.id = gm.assessmentlookupid
             -- AND gl.expired IS NULL  -- need to show transfer history if mapping becomes expired
-            
-        /***** join students that have equivalent sits mapping *****/     
-        JOIN {sits_mappings} AS sm
-            ON sm.acyear = gl.academic_year
+
+       /***** join students that have equivalent sits mapping *****/
+        JOIN {sits_mappings} sm
+            ON sm.acyear = gl.academicyear
             AND sm.period_code = gl.periodslotcode
-            AND sm.sits_code = gl.samis_unit_code
+            AND sm.sits_code = gl.samisunitcode
             AND sm.active = 1
             AND sm.default_map = 1
-        JOIN {sits_mappings_enrols} AS me ON me.map_id = sm.id
-        JOIN {user_enrolments} AS ue ON ue.id = me.u_enrol_id -- PROBLEM WITH user_enrolments BEING REMOVED!!!
-        JOIN {user} AS u ON u.id = ue.userid
-        
+        JOIN {sits_mappings_enrols} me ON me.map_id = sm.id
+        JOIN {user_enrolments} ue ON ue.id = me.u_enrol_id -- PROBLEM WITH user_enrolments BEING REMOVED!!!
+        JOIN {user} u ON u.id = ue.userid
+
         /***** join moodle activity information relating to mapping including current grade *****/
-        JOIN {course_modules} AS cm ON cm.id = gm.coursemodule
-        JOIN {modules} AS mo ON mo.id = cm.module
-        LEFT JOIN {grade_items} AS gi
+        JOIN {course_modules} cm ON cm.id = gm.coursemodule
+        JOIN {modules} mo ON mo.id = cm.module
+        LEFT JOIN {grade_items} gi
             ON gi.itemmodule = mo.name
             AND gi.iteminstance = cm.instance
-        LEFT JOIN {grade_grades} AS gg
+        LEFT JOIN {grade_grades} gg
             ON gg.itemid = gi.id
             AND gg.userid = ue.userid
-        
+
         /***** get time of latest transfer log entry for each student enrolment *****/
         LEFT JOIN
         (
@@ -128,18 +128,17 @@ class transfer_report extends \grade_report
         ) AS last_log
             ON last_log.userid = gg.userid
             AND last_log.gradetransfermappingid = gm.id
-            
+
         /***** join outcome status *****/
-        LEFT JOIN {local_bath_grades_log} AS log
+        LEFT JOIN {local_bath_grades_log} log
             ON log.gradetransfermappingid = last_log.gradetransfermappingid
             AND log.userid = last_log.userid
             AND log.timetransferred = last_log.timetransferred
-        LEFT JOIN {local_bath_grades_outcome} AS oc ON log.outcomeid = oc.id
-        
+        LEFT JOIN {local_bath_grades_outcome} oc ON log.outcomeid = oc.id
+
         WHERE gm.id = :id
         ";
-        //print $this->sql_from;
-        $this->sql_params['id'] = $this->id;
+        $this->sqlparams['id'] = $this->id;
     }
 
     /**
@@ -172,9 +171,10 @@ class transfer_report extends \grade_report
         global $DB;
 
         $years = array();
-        $options = $DB->get_records_sql("SELECT DISTINCT academic_year FROM {local_bath_grades_lookup} ORDER BY academic_year DESC");
+        $options = $DB->get_records_sql(
+            "SELECT DISTINCT academicyear FROM {local_bath_grades_lookup} ORDER BY academicyear DESC");
         foreach ($options as $option) {
-            $years[substr($option->academic_year, 0, 4)] = $option->academic_year;
+            $years[substr($option->academicyear, 0, 4)] = $option->academicyear;
         }
         return $years;
     }
@@ -194,10 +194,10 @@ class transfer_report extends \grade_report
         $params[] = $courseid;
 
         if (!empty($year)) {
-            $year_sql = 'AND SUBSTRING(gl.academic_year,1,4) = ?';
+            $yearsql = 'AND SUBSTRING(gl.academic_year,1,4) = ?';
             $params[] = $year;
         } else {
-            $year_sql = "";
+            $yearsql = "";
         }
 
         $mappings = $DB->get_records_sql("
@@ -207,60 +207,59 @@ class transfer_report extends \grade_report
             , gm.timemodified
             , gm.modifierid
             , gm.locked
-            , gm.samis_assessment_end_date
+            , gm.samisassessmentenddate
             , gl.id AS 'assessmentlookupid'
-            , gl.samis_assessment_id
-            , gl.mab_name AS 'samis_assessment_name'
-            , gl.academic_year
+            , gl.samisassessmentid
+            , gl.mabname AS 'samis_assessment_name'
+            , gl.academicyear
             , gl.occurrence
-            , gl.mab_seq
+            , gl.mabseq
             , gl.periodslotcode
             , gl.expired
             , cm.course
             , cm.id AS 'coursemoduleid'
             , cm.instance
-            , gm.activity_type AS 'moodle_activity_type'
-            FROM {local_bath_grades_mapping} AS gm
-            JOIN {local_bath_grades_lookup} AS gl ON gl.id = gm.assessment_lookup_id
-            JOIN {course_modules} AS cm ON cm.id = gm.coursemodule
-            JOIN {sits_mappings} AS sm 
-              ON sm.sits_code = gl.samis_unit_code 
+            , gm.activitytype AS 'moodle_activity_type'
+            FROM {local_bath_grades_mapping} gm
+            JOIN {local_bath_grades_lookup} gl ON gl.id = gm.assessmentlookupid
+            JOIN {course_modules} cm ON cm.id = gm.coursemodule
+            JOIN {sits_mappings} sm
+              ON sm.sits_code = gl.samisunitcode
               AND sm.courseid = cm.course
               AND sm.default_map = 1
               AND sm.active = 1
-              AND sm.acyear = gl.academic_year
+              AND sm.acyear = gl.academicyear
               AND sm.period_code = gl.periodslotcode
-            WHERE ( gl.expired IS NULL OR gl.expired = 0 OR EXISTS ( SELECT 1 FROM {local_bath_grades_log} AS l WHERE l.gradetransfermappingid = gl.id ) )
+            WHERE ( gl.expired IS NULL OR gl.expired = 0 OR
+             EXISTS ( SELECT 1 FROM {local_bath_grades_log} l WHERE l.gradetransfermappingid = gl.id ) )
             /* grade lookup is current or if expired some tranfers happened that might be of interest to user */
-            AND cm.course = ? " . $year_sql,
+            AND gm.expired = 0 -- to show non-expired mappings only
+            AND cm.course = ? " . $yearsql,
             $params
         );
 
         // Create both SAMIS assessment and Moodle activity select options
-        // TODO - only need one of these options - either external assessment list or moodle
+        // TODO - only need one of these options - either external assessment list or moodle.
         $selected = null;
-        //$options_moodle = array();
-        $options_external = array();
-        $options_external[0] = get_string('selectassessment', 'gradereport_transfer');
-        //$options_moodle[0] = get_string('selectassessment', 'gradereport_transfer');
+        $optionsexternal = array();
+        $optionsexternal[0] = get_string('selectassessment', 'gradereport_transfer');
 
         foreach ($mappings as $mapping) {
 
-            // Drop down menu options for mapped external assessments
-            $option_external_str = $mapping->samis_assessment_name . ' (' . $mapping->academic_year . ' - ' . $mapping->periodslotcode . ') ' . $mapping->mab_seq;
-            $options_external[$mapping->id] = $option_external_str;
-            $moodle_module = $DB->get_record($mapping->moodle_activity_type, array('id' => $mapping->instance));
-            $mapping->moodle_activity_name = $moodle_module->name;
+            // Drop down menu options for mapped external assessments.
+            $optionexternalstr = $mapping->samis_assessment_name .
+                ' (' . $mapping->academicyear . ' - ' . $mapping->periodslotcode . ') ' . $mapping->mabseq;
+            $optionsexternal[$mapping->id] = $optionexternalstr;
+            $moodlemodule = $DB->get_record($mapping->moodle_activity_type, array('id' => $mapping->instance));
+            $mapping->moodle_activity_name = $moodlemodule->name;
 
-            // Drop down menu options for mapped moodle activities
-            //$options_moodle[$mapping->id] = $mapping->moodle_activity_name;
+            // Drop down menu options for mapped moodle activities.
 
             if ($mapping->id == $this->id) {
                 $selected = $mapping;
             }
         }
-        //$this->moodle_activity = $options_moodle;
-        $this->external_assessment = $options_external;
+        $this->externalassessment = $optionsexternal;
         $this->selected = $selected;
     }
 
@@ -268,7 +267,7 @@ class transfer_report extends \grade_report
      * Get the report filter options
      * @return array $options
      */
-    function get_status_options() {
+    public function get_status_options() {
         $options = array();
         for ($statusid = 0; $statusid < 4; $statusid++) {
             $options[] = get_string('transferstatus' . $statusid, 'gradereport_transfer');
@@ -279,27 +278,28 @@ class transfer_report extends \grade_report
     /**
      * Get the list of students who's grade is to be transferred
      * @param string $dotransfer determines the how the list is derived - all/selected/single
-     * @return array $transfer_list - userids
+     * @return array $transferlist - userids
      */
     public function get_transfer_list($dotransfer) {
 
         switch ($dotransfer) {
             case 'all':
-                $transfer_list = $this->get_all_users();
+                $transferlist = $this->get_all_users();
                 break;
             case 'selected':
-                $transfer_list = $this->get_selected_users();
+                $transferlist = $this->get_selected_users();
                 break;
             default:
-                $transfer_list = $this->get_individual_user($dotransfer);
+                $transferlist = $this->get_individual_user($dotransfer);
                 break;
         }
-        return $transfer_list;
+        return $transferlist;
     }
 
     /**
-     * Get all students that should have completed the assessment - all SAMIS enrolled students with same mapping parameters as assessment
-     * @return array $transfer_list - userids
+     * Get all students that should have completed the assessment -
+     * all SAMIS enrolled students with same mapping parameters as assessment
+     * @return array $transferlist - userids
      */
     // TODO - this should be replaced by local plugin method?
     private function get_all_users() {
@@ -320,8 +320,9 @@ class transfer_report extends \grade_report
         $userids = array();
 
         foreach ($_POST as $k => $v) {
-            if (substr($k, 0, 4) == 'user') { // user is start of checkbox name
-                // get userid for selected checkbox
+            if (substr($k, 0, 4) == 'user') {
+                // User is start of checkbox name.
+                // Get userid for selected checkbox.
                 $userid = substr($k, 4);
                 if ($userid > 0) {
                     $userids[] = $userid;
@@ -345,19 +346,14 @@ class transfer_report extends \grade_report
 
     /**
      * Pass student list to grade transfer method in local plugin
-     * @param array $transfer_list - userids
+     * @param array $transferlist - userids
      * @return array containing single userid
      */
-    public function do_transfers($transfer_list = array()) {
-        // Require local plugin class
-
-        $grade_transfers = new \local_bath_grades_transfer();
-        $responses = $grade_transfers->transfer_mapping($this->id, $transfer_list);
+    public function do_transfers($transferlist = array()) {
+        // Require local plugin class.
+        $gradetransfers = new \local_bath_grades_transfer();
+        $responses = $gradetransfers->transfer_mapping($this->id, $transferlist);
         return $responses;
-
-        //todo - remove function below to transfer grades
-        //$grade_transfers = new \gradereport_transfer\grade_report_transfer_grade_transfer( $this->selected );
-        //$grade_transfers->prepare_grade_transfer($transfer_list);
     }
 
     /**
@@ -372,7 +368,7 @@ class transfer_report extends \grade_report
                   COUNT(*) AS total
                 , IFNULL( SUM( IF( gg.finalgrade IS NOT NULL, 1, 0 ) ), 0) as graded
                 , IFNULL( SUM( IF( log.outcomeid = 1, 1, 0 ) ), 0) as transferred
-                " . $this->sql_from, $this->sql_params);
+                " . $this->sqlfrom, $this->sqlparams);
 
         return ($rs);
     }
@@ -388,43 +384,43 @@ class transfer_report extends \grade_report
         $limitfrom = $table->get_page_start();
         $limitnum = $table->get_page_size();
 
-        $order_sql = "";
+        $ordersql = "";
         if ($orderby = $table->get_sql_sort()) {
-            $order_sql .= ' ORDER BY ' . $orderby . ' ';
+            $ordersql .= ' ORDER BY ' . $orderby . ' ';
         } else {
-            $order_sql .= ' ORDER BY lastname, firstname';
+            $ordersql .= ' ORDER BY lastname, firstname';
         }
 
-        $this->totalcount = $DB->count_records_sql("SELECT COUNT(ue.userid) " . $this->sql_from, $this->sql_params);
+        $this->totalcount = $DB->count_records_sql("SELECT COUNT(ue.userid) " . $this->sqlfrom, $this->sqlparams);
 
         if (!empty($this->search)) {
             $fullname = $DB->sql_fullname('u.firstname', 'u.lastname');
-            $this->sql_from .= " AND " . $DB->sql_like($fullname, ':search', false, false);
-            $this->sql_params['search'] = "%$this->search%";
+            $this->sqlfrom .= " AND " . $DB->sql_like($fullname, ':search', false, false);
+            $this->sqlparams['search'] = "%$this->search%";
         }
 
         if (!empty($this->sifirst)) {
-            $this->sql_from .= " AND " . $DB->sql_like('firstname', ':sifirst', false, false);
-            $this->sql_params['sifirst'] = "$this->sifirst%";
+            $this->sqlfrom .= " AND " . $DB->sql_like('firstname', ':sifirst', false, false);
+            $this->sqlparams['sifirst'] = "$this->sifirst%";
         }
 
         if (!empty($this->silast)) {
-            $this->sql_from .= " AND " . $DB->sql_like('lastname', ':silast', false, false);
-            $this->sql_params['silast'] = "$this->silast%";
+            $this->sqlfrom .= " AND " . $DB->sql_like('lastname', ':silast', false, false);
+            $this->sqlparams['silast'] = "$this->silast%";
         }
 
         switch ($this->transferstatus) {
-            case 1: // Completed transfers
-                $this->sql_from .= " AND log.outcomeid = 1";
+            case 1: // Completed transfers.
+                $this->sqlfrom .= " AND log.outcomeid = 1";
                 break;
-            case 2: // Failed transfers
-                $this->sql_from .= " AND log.outcomeid > 1";
+            case 2: // Failed transfers.
+                $this->sqlfrom .= " AND log.outcomeid > 1";
                 break;
-            case 3: // Not transferred yet
-                $this->sql_from .= " AND log.outcomeid IS NULL";
+            case 3: // Not transferred yet.
+                $this->sqlfrom .= " AND log.outcomeid IS NULL";
                 break;
         }
-        $this->matchcount = $DB->count_records_sql("SELECT COUNT(ue.userid) " . $this->sql_from, $this->sql_params);
+        $this->matchcount = $DB->count_records_sql("SELECT COUNT(ue.userid) " . $this->sqlfrom, $this->sqlparams);
 
         $rs = $DB->get_recordset_sql("
             SELECT
@@ -441,7 +437,7 @@ class transfer_report extends \grade_report
             , log.outcomeid
             , oc.outcome AS 'transfer_outcome'
             , log.gradetransferred
-            " . $this->sql_from . $order_sql, $this->sql_params, $limitfrom, $limitnum
+            " . $this->sqlfrom . $ordersql, $this->sqlparams, $limitfrom, $limitnum
         );
 
         return $rs;
@@ -452,16 +448,16 @@ class transfer_report extends \grade_report
      * @param array $tansfer_list - userids
      * @return array $rs of objects
      */
-    public function confirm_list($transfer_list = array()) {
+    public function confirm_list($transferlist = array()) {
         global $DB;
-        if (count($transfer_list) > 0) {
-            list($insql, $inparams) = $DB->get_in_or_equal($transfer_list, SQL_PARAMS_NAMED);
-            $this->sql_params = array_merge($this->sql_params, $inparams);
-            $subset_sql = " AND ue.userid $insql";
+        if (count($transferlist) > 0) {
+            list($insql, $inparams) = $DB->get_in_or_equal($transferlist, SQL_PARAMS_NAMED);
+            $this->sqlparams = array_merge($this->sqlparams, $inparams);
+            $subsetsql = " AND ue.userid $insql";
         } else {
-            $subset_sql = "";
+            $subsetsql = "";
         }
-        $order_by = "ORDER BY log.outcomeid DESC,IF(gg.finalgrade > 0,1,0) DESC,u.lastname ASC,u.firstname ASC";
+        $orderby = "ORDER BY log.outcomeid DESC,IF(gg.finalgrade > 0,1,0) DESC,u.lastname ASC,u.firstname ASC";
         $rs = $DB->get_records_sql("
             SELECT
               ue.userid
@@ -469,7 +465,7 @@ class transfer_report extends \grade_report
             , gg.rawgrademax
             , gg.timemodified AS 'timegraded'
             , log.outcomeid
-            " . $this->sql_from . $subset_sql.$order_by, $this->sql_params
+            " . $this->sqlfrom . $subsetsql . $orderby, $this->sqlparams
         );
 
         return $rs;

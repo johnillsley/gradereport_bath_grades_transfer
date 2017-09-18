@@ -14,27 +14,19 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
+/**
+ * Observer class to deal with events
+ *
+ * @package    grade_report_bath_transfer
+ * @author     Hittesh Ahuja <ha386@bath.ac.uk>
+ * @copyright  2017 University of Bath
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
 defined('MOODLE_INTERNAL') || die();
-
-$capabilities = array(
-    // TODO Do we need this?
-    'gradereport/transfer:view' => array(
-        'riskbitmask' => RISK_PERSONAL,
-        'captype' => 'read',
-        'contextlevel' => CONTEXT_COURSE,
-        'archetypes' => array(
-            'teacher' => CAP_ALLOW,
-            'manager' => CAP_ALLOW
-        )
-    ),
-    'gradereport/transfer:transfer' => array(
-        'riskbitmask' => RISK_PERSONAL,
-        'captype' => 'read',
-        'contextlevel' => CONTEXT_COURSE,
-        'archetypes' => array(
-            'teacher' => CAP_ALLOW,
-            'manager' => CAP_ALLOW
-        )
+$observers = array(
+    // User enrolled event.
+    array(
+        'eventname' => '\gradereport_transfer\event\grade_report_queue_grade_transfer',
+        'callback' => 'gradereport_transfer_observer::transfer_grade_queue',
     )
-
 );

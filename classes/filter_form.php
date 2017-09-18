@@ -28,42 +28,48 @@ namespace gradereport_transfer;
 
 defined('MOODLE_INTERNAL') || die;
 
-require_once($CFG->libdir.'/formslib.php');
+require_once($CFG->libdir . '/formslib.php');
 
-class filter_form extends \moodleform {
+class filter_form extends \moodleform
+{
 
     /**
      * Definition of the Mform for filters used in the report.
      */
     public function definition() {
 
-        $mform              = $this->_form;
-        $course             = $this->_customdata['course'];
-        //$years            = $this->_customdata['years'];
-        $mappingids         = $this->_customdata['mappingids'];
-        $selected_mapping   = $this->_customdata['selected_mapping'];
-        $transferstatus     = $this->_customdata['transferstatus'];
-        $selected_status    = $this->_customdata['selected_status'];
+        $mform = $this->_form;
+        $course = $this->_customdata['course'];
+        // $years            = $this->_customdata['years'];.
+        $mappingids = $this->_customdata['mappingids'];
+        $selectedmapping = $this->_customdata['selected_mapping'];
+        $transferstatus = $this->_customdata['transferstatus'];
+        $selectedstatus = $this->_customdata['selected_status'];
 
         // IS ACADEMIC YEAR REQUIRED IF MOODLE IS ARCHIVED EVERY YEAR?
-        //$mform->addElement('select', 'year', get_string('academicyear', 'gradereport_transfer'), $years);
-        //$mform->setType('year', PARAM_INT);
+        // $mform->addElement('select', 'year', get_string('academicyear', 'gradereport_transfer'), $years);.
+        // $mform->setType('year', PARAM_INT);.
 
-        $select_mapping = $mform->addElement('select', 'mappingid', get_string('mappingitem', 'gradereport_transfer'), $mappingids);
+        $selectmapping = $mform->addElement('select', 'mappingid', get_string('mappingitem', 'gradereport_transfer'), $mappingids);
         $mform->setType('mappingid', PARAM_INT);
-        $select_mapping->setSelected($selected_mapping);
+        $selectmapping->setSelected($selectedmapping);
 
-        $select_status = $mform->addElement('select', 'transferstatus', get_string('transferstatus', 'gradereport_transfer'), $transferstatus);
+        $selectstatus = $mform->addElement(
+            'select', 'transferstatus',
+            get_string('transferstatus',
+                'gradereport_transfer'),
+            $transferstatus
+        );
         $mform->setType('transferstatus', PARAM_INT);
-        $select_status->setSelected($selected_status);
+        $selectstatus->setSelected($selectedstatus);
 
         $mform->addElement('hidden', 'id', $course->id);
         $mform->setType('id', PARAM_INT);
 
-        $mform->addElement('hidden', 'sifirst', ""); // resets firstname initial filter when selecting new mapping
+        $mform->addElement('hidden', 'sifirst', ""); // Resets firstname initial filter when selecting new mapping.
         $mform->setType('sifirst', PARAM_RAW);
 
-        $mform->addElement('hidden', 'silast', ""); // resets lastname initial filter when selecting new mapping
+        $mform->addElement('hidden', 'silast', ""); // Resets lastname initial filter when selecting new mapping.
         $mform->setType('silast', PARAM_RAW);
 
         // Add a submit button.

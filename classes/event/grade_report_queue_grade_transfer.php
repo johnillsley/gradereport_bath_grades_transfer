@@ -18,7 +18,7 @@
  * Transfer report start transfer event.
  *
  * @package    grade_report_bath_transfer
- * @author     John Illsley <j.s.illsley@bath.ac.uk>
+ * @author     Hittesh Ahuja <ha386@bath.ac.uk>
  * @copyright  2017 University of Bath
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -28,11 +28,11 @@ namespace gradereport_transfer\event;
 defined('MOODLE_INTERNAL') || die();
 
 /**
- * Class to create event
- * @uses \core\event\grade_report_viewed
+ * Event to trigger a grade transfer
+ * @uses \core\event\base
  * @package grade_report_bath_transfer
  */
-class grade_report_starttransfer extends \core\event\grade_report_viewed
+class grade_report_queue_grade_transfer extends \core\event\base
 {
 
     /**
@@ -40,8 +40,7 @@ class grade_report_starttransfer extends \core\event\grade_report_viewed
      * @return void
      */
     protected function init() {
-        parent::init();
-        $this->data['crud'] = 'u';
+        $this->data['crud'] = 'c';
         $this->data['edulevel'] = self::LEVEL_OTHER;
     }
 
@@ -51,7 +50,7 @@ class grade_report_starttransfer extends \core\event\grade_report_viewed
      * @return string
      */
     public static function get_name() {
-        return get_string('eventgradereporttransfer', 'gradereport_transfer');
+        return get_string('gradereport_transfer_queue', 'gradereport_transfer');
     }
 
     /**
@@ -60,7 +59,7 @@ class grade_report_starttransfer extends \core\event\grade_report_viewed
      * @return string
      */
     public function get_description() {
-        return "The user with id '$this->userid' initiated grade transfers for the assessment " . $this->other['assessment_name'];
+        return "Grade for userid $this->other['users'] has been queued by $this->userid";
     }
 
     /**
