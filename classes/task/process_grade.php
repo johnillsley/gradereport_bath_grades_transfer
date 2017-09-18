@@ -25,6 +25,7 @@
 
 namespace gradereport_transfer\task;
 defined('MOODLE_INTERNAL') || die();
+require_once($CFG->dirroot.'/grade/lib.php');
 
 /**
  * Class process_grade
@@ -60,10 +61,6 @@ class process_grade extends \core\task\adhoc_task
         $context = \context_course::instance($courseid);
         $gpr = new \grade_plugin_return(array('type' => 'report', 'plugin' => 'transfer', 'courseid' => $eventdata['courseid']));
         $transferreport = new \gradereport_transfer\transfer_report($courseid, $gpr, $context, $mappingid);
-        $transfer_outcomes = $transferreport->do_transfers($eventdata['user']);
-        //die();
-        //if (!empty($transfer_outcomes)) {
-        //    echo json_encode($transfer_outcomes);
-        //
+        $transferoutcomes = $transferreport->do_transfers($eventdata['user']);
     }
 }
