@@ -74,6 +74,7 @@ $string['eventgradereportviewed'] = 'Grade transfer report viewed';
 $string['eventgradereporttransfer'] = 'Grade transfer triggered';
 $string['onlymappedassessments'] = 'Only mapped assessments are listed';
 $string['canceltransfer'] = 'Cancel';
+$string['nocapabilitytotransfer'] = 'Your role does not have the capaiblity to transfer grades';
 
 // HELP ICONS.
 
