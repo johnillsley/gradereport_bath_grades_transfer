@@ -104,12 +104,12 @@ if (has_capability('moodle/grade:viewall', $context)) {
     // Ok - can view all course grades.
     $access = true;
 }
+
 if (!$access) {
-    // no access to grades!
+    // No access to grades!.
     print_error('nopermissiontoviewgrades', 'error', $CFG->wwwroot . '/course/view.php?id=' . $course->id);
 }
 $gpr = new grade_plugin_return(array('type' => 'report', 'plugin' => 'transfer', 'courseid' => $course->id));
-//$gpr = new grade_plugin_return(array('type'=>'report', 'plugin'=>'overview', 'courseid'=>$course->id, 'userid'=>2));
 
 $transferreport = new \gradereport_transfer\transfer_report($course->id, $gpr, $context, $mappingid);
 $transferreport->get_mapping_options($course->id, $year);
@@ -155,13 +155,15 @@ $coursehassamiscode = $gradetransfer->samis_mapping_exists($course->id);
 if (empty($dotransfer)) {
 
     if ($coursehassamiscode) {
-
         echo "<p class='alert alert-info'>" . get_string('onlymappedassessments', 'gradereport_transfer') . "</p>";
+        if (!has_capability('gradereport/transfer:transfer', $context)) {
+            echo "<p class='alert alert-warning'>" . get_string('nocapabilitytotransfer', 'gradereport_transfer') . "</p>";
 
+        }
         // FILTER FORM.
         $params['course'] = $course;
         $params['years'] = $transferreport->get_academic_year_options(); // TODO - NEED TO MOVE THIS ABOVE THIS FORM
-        $params['mappingids'] = $transferreport->externalassessment; // Use $transferreport->moodle_activity for moodle list
+        $params['mappingids'] = $transferreport->externalassessment; // Use $transferreport->moodle_activity for moodle list.
         $params['selected_mapping'] = $mappingid;
         $params['transferstatus'] = $transferreport->get_status_options();
         $params['selected_status'] = $transferstatus;
@@ -171,12 +173,12 @@ if (empty($dotransfer)) {
 
         if ($mappingid > 0) {
 
-            // BEGINNING OF TRANSFER MAPPING OVERVIEW
+            // BEGINNING OF TRANSFER MAPPING OVERVIEW.
             echo "<h5>" . get_string('transferoverview', 'gradereport_transfer') . "</h5>";
             echo $output->selected_mapping_overview($transferreport);
-            // END OF TRANSFER MAPPING OVERVIEW
+            // END OF TRANSFER MAPPING OVERVIEW.
 
-            // BEGINNING OF INDIVIDUAL GRADE TRANSFER TABLE
+            // BEGINNING OF INDIVIDUAL GRADE TRANSFER TABLE.
             $transferreport->perpage = $perpage;
             $transferreport->search = $search;
             $transferreport->sifirst = $sifirst;
@@ -196,7 +198,12 @@ if (empty($dotransfer)) {
                 " (" . get_string('transferstatus' . $transferstatus, 'gradereport_transfer') . ")</h5>";
             $output->grade_transfer_table($transferreport);
             if ($output->bulkactions && $output->validmapping) {
-                echo $output->table_bulk_actions();
+                // ADD CAPABILITY HERE.
+                $context = context_course::instance($course->id);
+                if (has_capability('gradereport/transfer:transfer', $context)) {
+                    echo $output->table_bulk_actions();
+                }
+
             }
             echo '</form>';
 
