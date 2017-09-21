@@ -29,15 +29,35 @@ define(['jquery', 'core/templates', 'core/ajax', 'core/config', 'core/yui'], fun
             label: 'OK',
             action: function (e) {
                 e.preventDefault();
+                // Redirect to previous page.
+                var id = findGetParameter('id');
+                var mappingid = findGetParameter('mappingid');
+                window.location.href = 'http://essd.bath.ac.uk/moodle31/grade/report/transfer/index.php?id=' + id + '&mappingid=' + mappingid;
                 yuiDialogue.hide();
             },
             section: Y.WidgetStdMod.FOOTER
         });
         yuiDialogue.show();
     };
+    var findGetParameter = function (parameterName) {
+        var result = null,
+            tmp = [];
+        location.search
+            .substr(1)
+            .split("&")
+            .forEach(function (item) {
+                tmp = item.split("=");
+                if (tmp[0] === parameterName) result = decodeURIComponent(tmp[1]);
+            });
+        return result;
+    };
     var sendSingleGrade = function (users, data_json, succ_count, failed_count, startTime) {
         var single_user = users[0];
         var tr_node = $('#confirm_transfer_table tbody').find("tr[data-moodle-user-id='" + single_user + "']");
+        /*tr_node
+         .removeClass()
+         .addClass('label label-warning transfer_status')
+         .html('');*/
         var loading_div = tr_node.find('td').find('.loadingDiv');
         loading_div.show();
         $.each(data_json, function (i, obj) {
@@ -56,15 +76,13 @@ define(['jquery', 'core/templates', 'core/ajax', 'core/config', 'core/yui'], fun
         }).done(function (transfer_status) {
             console.log(transfer_status);
             if (tr_node.attr('data-moodle-user-id') == transfer_status.userid) {
-                //console.log("YEs I found a target..Applying it");
                 if (transfer_status.status == 'queued') {
                     //total transferred
                     succ_count++;
-                    //console.log("Status is success");
                     $('#confirm_transfer_table tbody').find("tr[data-moodle-user-id='" + transfer_status.userid + "']")
                         .find('.transfer_status')
                         //.removeClass('label-warning')
-                        //.addClass('label-success')
+                        .addClass('label-success')
                         .html(transfer_status.reason);
                 }
                 else if (transfer_status.status == 'failure') {
@@ -104,7 +122,14 @@ define(['jquery', 'core/templates', 'core/ajax', 'core/config', 'core/yui'], fun
         var users = [];
         $.each(nodes, function (i, tr_node) {
             var node_user_value = $(tr_node).attr('data-moodle-user-id');
+            var already_in_queue_value = $(tr_node).attr('data-already-in-queue');
             users.push(node_user_value);
+            /* if(already_in_queue_value == 1) {
+             return true;
+             }
+             else{
+             users.push(node_user_value);
+             }*/
         });
         return users;
     };
@@ -119,16 +144,9 @@ define(['jquery', 'core/templates', 'core/ajax', 'core/config', 'core/yui'], fun
             '&mappingid=' +
             data[4].value);
         $("body").css("cursor", "progress");
-        $('#confirm_transfer_table .transfer_status')
-            .removeClass()
-            .addClass('label label-warning transfer_status')
-            .html('');
-        var data_json = {};
+
         //Get submitted data
-        //var promise = $.Deferred();
         var parent_tr_nodes = $('#confirm_transfer_table tbody tr');
-
-
         //console.log(data);
         var users = getUsers(parent_tr_nodes);
         //Now that I have the users, get the first one in the index.
