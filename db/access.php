@@ -17,13 +17,22 @@
 defined('MOODLE_INTERNAL') || die();
 
 $capabilities = array(
-
+    // TODO Do we need this?
     'gradereport/transfer:view' => array(
         'riskbitmask' => RISK_PERSONAL,
         'captype' => 'read',
         'contextlevel' => CONTEXT_COURSE,
         'archetypes' => array(
-            'student' => CAP_ALLOW,
+            'teacher' => CAP_ALLOW,
+            'manager' => CAP_ALLOW
+        )
+    ),
+    'gradereport/transfer:transfer' => array(
+        'riskbitmask' => RISK_PERSONAL,
+        'captype' => 'read',
+        'contextlevel' => CONTEXT_COURSE,
+        'archetypes' => array(
+            'teacher' => CAP_ALLOW,
             'manager' => CAP_ALLOW
         )
     )

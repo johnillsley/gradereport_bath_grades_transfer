@@ -46,7 +46,7 @@ class gradereport_transfer_renderer extends plugin_renderer_base
      * @return string
      */
     public function selected_mapping_overview($transferreport) {
-        global $CFG, $DB, $OUTPUT;
+        global $CFG, $DB, $OUTPUT, $PAGE;
         $editpageurl = $CFG->wwwroot . '/course/modedit.php?update=' . $transferreport->selected->coursemoduleid;
         $gradespageurl = $CFG->wwwroot . '/mod/' .
             $transferreport->selected->moodle_activity_type .
@@ -77,8 +77,13 @@ class gradereport_transfer_renderer extends plugin_renderer_base
             $status .= ' <strong><a href="' . $editpageurl . '">' .
                 get_string('scheduletransfer', 'gradereport_transfer') . '</a></strong>';
             $status .= get_string('triggermanually', 'gradereport_transfer');
-            $status .= '<br/><a class="btn btn-default" href="' . $dotransfersurl . '">' .
-                get_string('transferall', 'gradereport_transfer') . '</a>';
+            // Add CAPABILITY HERE.
+            $context = context_course::instance($PAGE->course->id);
+            if (has_capability('gradereport/transfer:transfer', $context)) {
+                $status .= '<br/><a class="btn btn-default" href="' . $dotransfersurl . '">' .
+                    get_string('transferall', 'gradereport_transfer') . '</a>';
+            }
+
         } else if ($transferreport->selected->samis_assessment_end_date > time()) {
             // Transfer will occur in the future.
             $status = get_string('transferscheduled', 'gradereport_transfer') .
@@ -243,9 +248,15 @@ class gradereport_transfer_renderer extends plugin_renderer_base
                             '&dotransfer=' .
                             $grade->userid .
                             '&returnto=' . s($PAGE->url->out(false));
-                        $transfernow = '<a href="' . $buttonurl . '" class="btn btn-default">' .
-                            get_string('transfergrade', 'gradereport_transfer') . '<a/>';
-                        $checkbox = '<input type="checkbox" class="usercheckbox" name="user' . $grade->userid . '" />';
+                        // ADD CAPABILITY HERE.
+                        $context = context_course::instance($PAGE->course->id);
+                        if (has_capability('gradereport/transfer:transfer', $context)) {
+                            $transfernow = '<a href="' . $buttonurl . '" class="btn btn-default">' .
+                                get_string('transfergrade', 'gradereport_transfer') . '<a/>';
+                            $checkbox = '<input type="checkbox" class="usercheckbox" name="user' . $grade->userid . '" />';
+                        }
+
+
                         $this->bulkactions = true;
                     }
                     $gradetransferred = "";
@@ -302,9 +313,6 @@ class gradereport_transfer_renderer extends plugin_renderer_base
         $output .= '<br /><div class="buttons">';
         $output .= '<input type="button" id="checkall" value="' . get_string('selectall') . '" /> ';
         $output .= '<input type="button" id="checknone" value="' . get_string('deselectall') . '" /> ';
-
-        // Print "Remove ability to do single transfers until after bulk transfer has been attemped?? - maybe ok to do this!";.
-
         $displaylist = array();
         $displaylist[$PAGE->url->out()] = get_string('transfergrades', 'gradereport_transfer');
 
@@ -438,12 +446,7 @@ Proceed with data transfer</span> button to complete the request or
         $output .= '<input type="hidden" name="dotransfer" value="' . $dotransfer . '" />';
         $output .= '<input type="hidden" name="id" value="' . $PAGE->course->id . '" />';
         $output .= '<input type="hidden" name="mappingid" value="' . $transferreport->id . '" />';
-        if ($dotransfer == "selected") {
-            foreach ($transferlist as $userid) {
-                //$output .= '<input type="hidden" name="user'.$userid.'" value="on" />';
-                //$output .= '<input type="hidden" name="user[]" value="' . $userid . '" />';
-            }
-        }
+
         // $output .= '<input type="hidden" name="returnto" value="'.s($PAGE->url->out(false)).'" />'; // TODO value.
 
         $output .= '<button class="btn btn-success" id = "proceed_grade_transfer" type="submit">' .
