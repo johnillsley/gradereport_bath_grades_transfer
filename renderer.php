@@ -58,7 +58,9 @@ class gradereport_transfer_renderer extends plugin_renderer_base
             '&dotransfer=all&mappingid=' . $transferreport->id;
 
         $usermodifier = $DB->get_record('user', array('id' => $transferreport->selected->modifierid));
-        $useraction = ($transferreport->selected->timecreated == $transferreport->selected->timemodified) ? get_string('createdby', 'question') . ' ' : get_string('lastmodifiedby', 'question') . ' ';
+        $useraction = ($transferreport->selected->timecreated == $transferreport->selected->timemodified) ?
+            get_string('createdby', 'question') .
+            ' ' : get_string('lastmodifiedby', 'question') . ' ';
         $activityprogress = $transferreport->get_progress();
 
         $warning = (!empty($transferreport->selected->locked)) ? ' <span class="label label-warning">' . get_string('locked', 'grades') . '</span>' : '';
@@ -117,7 +119,7 @@ class gradereport_transfer_renderer extends plugin_renderer_base
         $table->data[] = array(
             get_string('moodleactivitytype', 'gradereport_transfer') .
             $OUTPUT->help_icon('moodle_activity_type', 'gradereport_transfer'),
-            $transferreport->selected->moodle_activity_type
+            ($transferreport->selected->moodle_activity_type == 'assign' ? 'Assignment' : $transferreport->selected->moodle_activity_type )
         );
         $table->data[] = array(
             get_string('moodleactivityname', 'gradereport_transfer') .
@@ -396,6 +398,7 @@ class gradereport_transfer_renderer extends plugin_renderer_base
         );
         foreach ($confirmlist as $confirmitem) {
             $user = $DB->get_record('user', array('id' => $confirmitem->userid));
+
             $graded = (empty($confirmitem->timegraded)) ? get_string('notgraded', 'question') : userdate($confirmitem->timegraded);
             if ($confirmitem->outcomeid == 1) {
                 $status = '<span class="label label-warning transfer_status">' .
@@ -407,22 +410,29 @@ class gradereport_transfer_renderer extends plugin_renderer_base
             } else if ($confirmitem->rawgrademax != MAX_GRADE) {
                 $status = '<span class="label label-danger transfer_status">' .
                     get_string('wrongmaxgrade', 'gradereport_transfer') . '</span>';
+            } else if ($this->is_already_in_queue($transferreport->id, $confirmitem->userid)) {
+                $status = '<span class="label label-danger transfer_status">' .
+                    'Already Added to Queue' . '</span>';
+                $rowattributes = array('data-already-in-queue' => 1);
             } else {
                 $willbetransferredcount++;
                 $status = '<span class="label label-success transfer_status">' .
                     get_string('willbetransferred', 'gradereport_transfer') . '</span>';
             }
-            $loadingdiv = "<div class='loadingDiv' style='display: none;'>
-<img width='32' height='32' src='images/Spinner.gif'/></div>$status";
+
             // Dont show if grade is already transferred.
             /*if ($confirmitem->outcomeid != 1) {*/
+            $loadingdiv = "<div class='loadingDiv' style='display: none;'>
+<img width='32' height='32' src='images/Spinner.gif'/></div>$status";
             $row = new html_table_row(array(
                 fullname($user),
                 $this->display_grade($confirmitem),
                 $graded,
                 $loadingdiv
             ));
-            $row->attributes = array("class" => "", "data-moodle-user-id" => $user->id);
+            $rowattributes['class'] = '';
+            $rowattributes['data-moodle-user-id'] = $user->id;
+            $row->attributes = $rowattributes;
             $table->data[] = $row;
             /*}*/
         }
@@ -440,16 +450,12 @@ Proceed with data transfer</span> button to complete the request or
 </ul>
 </div>";
         $output .= html_writer::table($table);
-
         $output .= '<form action="index.php" method="post" id="transferconfirmed">';
         $output .= '<input type="hidden" name="confirmtransfer" value="1" />';
         $output .= '<input type="hidden" name="sesskey" value="' . sesskey() . '" />';
         $output .= '<input type="hidden" name="dotransfer" value="' . $dotransfer . '" />';
         $output .= '<input type="hidden" name="id" value="' . $PAGE->course->id . '" />';
         $output .= '<input type="hidden" name="mappingid" value="' . $transferreport->id . '" />';
-
-        // $output .= '<input type="hidden" name="returnto" value="'.s($PAGE->url->out(false)).'" />'; // TODO value.
-
         $output .= '<button class="btn btn-success" id = "proceed_grade_transfer" type="submit">' .
             get_string('proceedwithtransfer', 'gradereport_transfer') . '</button>';
         $output .= ' <a id = "cancel_grade_transfer" href="javascript:history.back()" class="btn btn-danger">' .
@@ -458,6 +464,21 @@ Proceed with data transfer</span> button to complete the request or
         return $output;
     }
 
+    private function is_already_in_queue($mappingid, $userid) {
+        global $DB;
+        // Get all adhoc queues.
+        $adhocqueues = $DB->get_records('task_adhoc', ['component' => 'gradereport_transfer'], '', 'id,customdata');
+        if (!empty($adhocqueues)) {
+            foreach ($adhocqueues as $customdata) {
+                $customdataobject = json_decode($customdata->customdata);
+                if ($customdataobject->mappingid == $mappingid && $customdataobject->user[0] == $userid) {
+                    // Already exists in the adhoc queue.
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
     /**
      * Output of formatted grade
      * @param object $grade
