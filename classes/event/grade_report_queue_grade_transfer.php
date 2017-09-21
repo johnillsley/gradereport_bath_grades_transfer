@@ -59,7 +59,7 @@ class grade_report_queue_grade_transfer extends \core\event\base
      * @return string
      */
     public function get_description() {
-        return "Grade for userid $this->other['users'] has been queued by $this->userid";
+        return 'Transfer of grade has been queued';
     }
 
     /**
@@ -67,7 +67,7 @@ class grade_report_queue_grade_transfer extends \core\event\base
      * @return \moodle_url
      */
     public function get_url() {
-        $url = '/grade/report/' . $this->reporttype . '/index.php';
+        $url = '/grade/report/transfer/index.php';
         return new \moodle_url($url, array('id' => $this->courseid, 'mappingid' => $this->other['mappingid']));
     }
 }
