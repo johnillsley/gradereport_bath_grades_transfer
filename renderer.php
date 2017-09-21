@@ -216,9 +216,8 @@ class gradereport_transfer_renderer extends plugin_renderer_base
         $table->is_persistent(true);
         $table->initialbars(true);
 
-        $table->pagesize($transferreport->perpage, $transferreport->matchcount);
-
         $gradelist = $transferreport->user_list($table);
+        $table->pagesize($transferreport->perpage, $transferreport->matchcount);
 
         if ($gradelist->valid()) {
 
