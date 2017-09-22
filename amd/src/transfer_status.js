@@ -1,6 +1,16 @@
 define(['jquery', 'core/templates', 'core/ajax', 'core/config', 'core/yui'], function ($, templates, ajax, config, Y) {
     var URL = config.wwwroot + '/grade/report/transfer/ajax.php';
-    //Show an end summary of grades transferred and failed.
+    document.addEventListener('keydown', function (event) {
+        if (event.keyCode == 27) {
+            event.preventDefault();
+            return false;
+        }
+    });
+
+    /*
+     Once all the queueing has been done, the end summary shows a list of what has been queued with the
+     total time taken.
+     */
     var endSummary = function (data, total_time) {
         var success_transfers_count = data.success;
         var failed_transfers_count = data.failed;
@@ -22,7 +32,8 @@ define(['jquery', 'core/templates', 'core/ajax', 'core/config', 'core/yui'], fun
             center: true,
             modal: true,
             width: 400,
-            closeButton: true,
+            closeButton: false,
+            hideaftersubmit: false,
             closeButtonTitle: 'Close'
         });
         yuiDialogue.addButton({
@@ -47,17 +58,18 @@ define(['jquery', 'core/templates', 'core/ajax', 'core/config', 'core/yui'], fun
             .split("&")
             .forEach(function (item) {
                 tmp = item.split("=");
-                if (tmp[0] === parameterName) result = decodeURIComponent(tmp[1]);
+                if (tmp[0] === parameterName) {
+                    result = decodeURIComponent(tmp[1]);
+                }
             });
         return result;
     };
+    /*
+     Send a single grade to the queueing mechanism.
+     */
     var sendSingleGrade = function (users, data_json, succ_count, failed_count, startTime) {
         var single_user = users[0];
         var tr_node = $('#confirm_transfer_table tbody').find("tr[data-moodle-user-id='" + single_user + "']");
-        /*tr_node
-         .removeClass()
-         .addClass('label label-warning transfer_status')
-         .html('');*/
         var loading_div = tr_node.find('td').find('.loadingDiv');
         loading_div.show();
         $.each(data_json, function (i, obj) {
@@ -118,6 +130,9 @@ define(['jquery', 'core/templates', 'core/ajax', 'core/config', 'core/yui'], fun
         });
 
     };
+    /*
+     Get all the users from DOM
+     */
     var getUsers = function (nodes) {
         var users = [];
         $.each(nodes, function (i, tr_node) {
@@ -133,6 +148,10 @@ define(['jquery', 'core/templates', 'core/ajax', 'core/config', 'core/yui'], fun
         });
         return users;
     };
+    /*
+     Initial function that triggers sending of grades. This includes @sendSingleGrade which then
+     queues them one by one.
+     */
     var sendGrades = function (node, e) {
         e.preventDefault();
         //disable the button
