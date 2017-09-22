@@ -24,7 +24,7 @@
  */
 defined('MOODLE_INTERNAL') || die();
 $observers = array(
-    // User enrolled event.
+    // Grade transfer queued event.
     array(
         'eventname' => '\gradereport_transfer\event\grade_report_queue_grade_transfer',
         'callback' => 'gradereport_transfer_observer::transfer_grade_queue',
