@@ -225,22 +225,32 @@ class gradereport_transfer_renderer extends plugin_renderer_base
 
                 $checkbox = '';
                 $transfernow = '';
+                $transferstatus = '';
 
                 if ($grade->outcomeid != 1) {
                     // The grade has not been succesfully transferred yet.
-                    if (!empty($grade->outcomeid > 0)) {
+                    if ($grade->outcomeid > 1) {
                         // Transfer previously failed.
                         $transferstatus = '<span class="label label-danger">' .
                             get_string('transferfailed', 'gradereport_transfer') . '</span>';
                         $transferstatus .= " ($grade->transfer_outcome)";
-                    } else {
-                        // Transfer not attempted yet.
-                        $transferstatus = '<span class="label label-warning">' .
-                            get_string('transferpending', 'gradereport_transfer') . '</span>';
                     }
-                    if (!empty($grade->finalgrade) && $grade->rawgrademax == MAX_GRADE && $this->validmapping) {
-                        // Create transfer button and checkbox if there is a grade to transfer.
 
+                    if (is_null($grade->finalgrade)) { // Check if finalgrade exists
+                        $transferstatus .= '<span class="label label-danger">' .
+                            get_string('nogradetotransfer', 'gradereport_transfer') . '</span>';
+
+                    } elseif ($grade->finalgrade!=round($grade->finalgrade)) { // Check if finalgrade is whole number
+                        $transferstatus .= '<span class="label label-danger">' .
+                            get_string('gradenotinteger', 'gradereport_transfer') . '</span>';
+
+                    } elseif ($grade->rawgrademax!=MAX_GRADE) { // Check if finalgrade is out of 100
+                        $transferstatus .= '<span class="label label-danger">' .
+                            get_string('wrongmaxgrade', 'gradereport_transfer') . '</span>';
+
+                    } else { // Grade is ready to be transferred
+                        $transferstatus .= '<span class="label label-warning">' .
+                            get_string('transferpending', 'gradereport_transfer') . '</span>';
                         $buttonurl = $CFG->wwwroot . '/grade/report/transfer/index.php?id=' .
                             $PAGE->course->id .
                             '&mappingid=' .
@@ -248,14 +258,13 @@ class gradereport_transfer_renderer extends plugin_renderer_base
                             '&dotransfer=' .
                             $grade->userid .
                             '&returnto=' . s($PAGE->url->out(false));
-                        // ADD CAPABILITY HERE.
+
                         $context = context_course::instance($PAGE->course->id);
                         if (has_capability('gradereport/transfer:transfer', $context)) {
                             $transfernow = '<a href="' . $buttonurl . '" class="btn btn-default">' .
                                 get_string('transfergrade', 'gradereport_transfer') . '<a/>';
                             $checkbox = '<input type="checkbox" class="usercheckbox" name="user' . $grade->userid . '" />';
                         }
-
 
                         $this->bulkactions = true;
                     }
@@ -464,9 +473,11 @@ Proceed with data transfer</span> button to complete the request or
      */
     private function display_grade($grade) {
 
-        $maxgrade = round($grade->rawgrademax);
+        $actualgrade = (float)$grade->finalgrade;
+        $maxgrade = (float)$grade->rawgrademax;
+        $gradedisplay = (round($actualgrade)==$actualgrade) ? $actualgrade : '<span class="max_grade_warning">' . $actualgrade . '</span>';
         $maxdisplay = ($maxgrade == MAX_GRADE) ? $maxgrade : '<span class="max_grade_warning">' . $maxgrade . '</span>';
-        return (!empty($grade->finalgrade)) ? round($grade->finalgrade) . ' / ' . $maxdisplay : '';
+        return (!empty($grade->finalgrade)) ? $gradedisplay . ' / ' . $maxdisplay : '';
     }
 
     public function render_transfer_status(\templatable $transferstatus) {
