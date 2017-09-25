@@ -195,7 +195,7 @@ define(['jquery', 'core/templates', 'core/ajax', 'core/config', 'core/yui'], fun
             '&mappingid=' +
             data[4].value);
         $("body").css("cursor", "progress");
-
+//
         //Get submitted data
         var parent_tr_nodes = $('#confirm_transfer_table tbody tr');
         //console.log(data);
