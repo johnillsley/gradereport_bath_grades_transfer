@@ -6,7 +6,33 @@ define(['jquery', 'core/templates', 'core/ajax', 'core/config', 'core/yui'], fun
             return false;
         }
     });
-
+    var dialogueBuilder = function (header, body) {
+        var yuiDialogue = new M.core.dialogue({
+            headerContent: header,
+            bodyContent: body,
+            draggable: false,
+            visible: false,
+            center: true,
+            modal: true,
+            width: 400,
+            closeButton: false,
+            hideaftersubmit: false
+        });
+        yuiDialogue.addButton({
+            label: 'OK',
+            action: function (e) {
+                e.preventDefault();
+                // Redirect to previous page.
+                var id = findGetParameter('id');
+                var mappingid = findGetParameter('mappingid');
+                window.location.href = config.wwwroot + '/grade/report/transfer/index.php?id=' + id + '&mappingid=' + mappingid;
+                yuiDialogue.hide();
+            },
+            section: Y.WidgetStdMod.FOOTER
+        });
+        //yuiDialogue.show();
+        return yuiDialogue;
+    };
     /*
      Once all the queueing has been done, the end summary shows a list of what has been queued with the
      total time taken.
@@ -19,35 +45,13 @@ define(['jquery', 'core/templates', 'core/ajax', 'core/config', 'core/yui'], fun
             + success_transfers_count + "</span>";
         var failed_transfer_text = "Failed transfers : <span class='label-danger label'>" + failed_transfers_count + "</span>";
         var total_text = "Total : <span class='label-info label'>" + (success_transfers_count + failed_transfers_count) + "</span>";
-        var yuiDialogue = new M.core.dialogue({
-            headerContent: 'Summary',
-            bodyContent: "<div id='transfer_summary'>" +
+        var body = "<div id='transfer_summary'>" +
             "<p>" + succcess_transfer_text + "</p>"
             + "<p>" + failed_transfer_text + "</p>"
             + "<p>" + total_text + "</p>"
             + "<p>Total time taken: " + total_time + " seconds</p>"
-            + "</div>",
-            draggable: false,
-            visible: false,
-            center: true,
-            modal: true,
-            width: 400,
-            closeButton: false,
-            hideaftersubmit: false,
-            closeButtonTitle: 'Close'
-        });
-        yuiDialogue.addButton({
-            label: 'OK',
-            action: function (e) {
-                e.preventDefault();
-                // Redirect to previous page.
-                var id = findGetParameter('id');
-                var mappingid = findGetParameter('mappingid');
-                window.location.href = 'http://essd.bath.ac.uk/moodle31/grade/report/transfer/index.php?id=' + id + '&mappingid=' + mappingid;
-                yuiDialogue.hide();
-            },
-            section: Y.WidgetStdMod.FOOTER
-        });
+            + "</div>";
+        var yuiDialogue = dialogueBuilder('Summary', body);
         yuiDialogue.show();
     };
     var findGetParameter = function (parameterName) {
@@ -105,14 +109,11 @@ define(['jquery', 'core/templates', 'core/ajax', 'core/config', 'core/yui'], fun
                         .html(transfer_status.reason);
                 }
             }
-            // });
-            //});
             loading_div.hide();
             //throw new Error("my error message");
             //Continue with the next one
 
             users.splice($.inArray(single_user, users), 1);
-            //console.log("Spliced...");
             //Re-run the function
             if (users.length > 0) {
                 sendSingleGrade(users, data_json, succ_count, failed_count, startTime);
@@ -123,8 +124,6 @@ define(['jquery', 'core/templates', 'core/ajax', 'core/config', 'core/yui'], fun
                 var total_count = {'success': succ_count, 'failed': failed_count};
                 var total_time = (endTime - startTime);
                 total_time /= 1000;
-                //var total_time_seconds = Math.round(total_time % 60);
-                //console.log(total_time_seconds);
                 endSummary(total_count, total_time);
             }
         });
@@ -147,6 +146,39 @@ define(['jquery', 'core/templates', 'core/ajax', 'core/config', 'core/yui'], fun
              }*/
         });
         return users;
+    };
+    var checkGradeStructure = function (node, e) {
+        e.preventDefault();
+        //disable the button
+        $(node).attr('disabled', true);
+        var form = $('#transferconfirmed');
+        var data = form.serializeArray();
+
+        data.push({'name': 'action', 'value': 'grade_struct_exists'});
+        $.ajax({
+            type: 'POST',
+            dataType: 'json',
+            data: data,
+            url: URL
+        }).done(function (grade_struct_status) {
+            console.log(grade_struct_status);
+            if (grade_struct_status.status === 'grade_struct_empty') {
+                //Grade Structure is empty.
+                var body = "<div class='grades_transfer_summary' id='grade_struct_summary'>" +
+                    "<p>SAMIS grade structure is empty.  Unable to transfer grade information.</p> " +
+                    "<p class=\"alert alert-warning\">If problem persists :" +
+                    " <strong>Faculty administrators may need to run SAS1B</strong></p>"
+                    + "</div>";
+                var yuiDialogue = dialogueBuilder('Pre-check', body);
+                yuiDialogue.show();
+                return false;
+            }
+            else {
+                //Ok to queue the others
+                console.log("Ok to queue the others");
+                sendGrades(node, e);
+            }
+        });
     };
     /*
      Initial function that triggers sending of grades. This includes @sendSingleGrade which then
@@ -177,10 +209,14 @@ define(['jquery', 'core/templates', 'core/ajax', 'core/config', 'core/yui'], fun
     return {
         init: function () {
             $('#proceed_grade_transfer').click(function (e) {
-                sendGrades(this, e);
+                // First make sure the grade structure is not empty
+                if (checkGradeStructure(this, e) === true) {
+                    console.log("GS OK, sending Grades");
+                    sendGrades(this, e);
+                }
+
+                //sendGrades(this, e);
             });
-
-
         }
     };
 });
