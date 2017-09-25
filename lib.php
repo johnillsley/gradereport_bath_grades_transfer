@@ -123,7 +123,7 @@ class transfer_report extends \grade_report
                 , gradetransfermappingid
                 , MAX( timetransferred ) AS timetransferred
             FROM {local_bath_grades_log}
-            WHERE outcomeid != " . GRADE_ALREADY_EXISTS . "
+            -- WHERE outcomeid != " . GRADE_ALREADY_EXISTS . "
             GROUP BY userid, gradetransfermappingid
         ) AS last_log
             ON last_log.userid = gg.userid
@@ -269,7 +269,7 @@ class transfer_report extends \grade_report
      */
     public function get_status_options() {
         $options = array();
-        for ($statusid = 0; $statusid < 4; $statusid++) {
+        for ($statusid = 0; $statusid < 5; $statusid++) {
             $options[] = get_string('transferstatus' . $statusid, 'gradereport_transfer');
         }
         return $options;
@@ -417,7 +417,13 @@ class transfer_report extends \grade_report
                 $this->sqlfrom .= " AND log.outcomeid > 1";
                 break;
             case 3: // Not transferred yet.
-                $this->sqlfrom .= " AND log.outcomeid IS NULL";
+            $this->sqlfrom .= " AND log.outcomeid IS NULL";
+                break;
+            case 4: // Ready to transfer.
+                $this->sqlfrom .= " AND (log.outcomeid NOT IN (1,8) OR log.outcomeid IS NULL) -- already transferred or queued
+                                    AND gg.finalgrade IS NOT NULL
+                                    AND CEIL(gg.finalgrade) = gg.finalgrade
+                                    AND gg.rawgrademax=".MAX_GRADE;
                 break;
         }
         $this->matchcount = $DB->count_records_sql("SELECT COUNT(ue.userid) " . $this->sqlfrom, $this->sqlparams);
