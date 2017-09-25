@@ -221,38 +221,52 @@ class gradereport_transfer_renderer extends plugin_renderer_base
 
         if ($gradelist->valid()) {
 
+            $context = context_course::instance($PAGE->course->id);
             foreach ($gradelist as $grade) {
 
                 $user = $DB->get_record('user', array('id' => $grade->userid));
 
                 $checkbox = '';
-                $transfernow = '';
+                $transferbutton = '';
                 $transferstatus = '';
+                $transferallowed = true;
 
                 if ($grade->outcomeid != 1) {
                     // The grade has not been succesfully transferred yet.
-                    if ($grade->outcomeid > 1) {
+                    if ( $grade->outcomeid==GRADE_QUEUED ) {
+                        $transferstatus = '<span class="label label-warning">' .
+                            $grade->transfer_outcome . '</span> '.userdate($grade->timetransferred);
+                        $transferallowed = false;
+
+                    } elseif ($grade->outcomeid > 1) {
                         // Transfer previously failed.
                         $transferstatus = '<span class="label label-danger">' .
-                            get_string('transferfailed', 'gradereport_transfer') . '</span>';
-                        $transferstatus .= " ($grade->transfer_outcome)";
+                            get_string('transferfailed', 'gradereport_transfer') . '</span> ';
+                        $transferstatus .= userdate($grade->timetransferred)." - <strong>".$grade->transfer_outcome."</strong>";
                     }
 
                     if (is_null($grade->finalgrade)) { // Check if finalgrade exists
-                        $transferstatus .= '<span class="label label-danger">' .
+                        $localprecheck = '<span class="label label-danger">' .
                             get_string('nogradetotransfer', 'gradereport_transfer') . '</span>';
+                        $transferallowed = false;
 
                     } elseif ($grade->finalgrade!=round($grade->finalgrade)) { // Check if finalgrade is whole number
-                        $transferstatus .= '<span class="label label-danger">' .
+                        $localprecheck = '<span class="label label-danger">' .
                             get_string('gradenotinteger', 'gradereport_transfer') . '</span>';
+                        $transferallowed = false;
 
                     } elseif ($grade->rawgrademax!=MAX_GRADE) { // Check if finalgrade is out of 100
-                        $transferstatus .= '<span class="label label-danger">' .
+                        $localprecheck = '<span class="label label-danger">' .
                             get_string('wrongmaxgrade', 'gradereport_transfer') . '</span>';
+                        $transferallowed = false;
 
                     } else { // Grade is ready to be transferred
-                        $transferstatus .= '<span class="label label-warning">' .
+                        $localprecheck = '<span class="label label-warning">' .
                             get_string('transferpending', 'gradereport_transfer') . '</span>';
+                    }
+
+                    if($transferallowed==true && has_capability('gradereport/transfer:transfer', $context)) {
+
                         $buttonurl = $CFG->wwwroot . '/grade/report/transfer/index.php?id=' .
                             $PAGE->course->id .
                             '&mappingid=' .
@@ -261,15 +275,13 @@ class gradereport_transfer_renderer extends plugin_renderer_base
                             $grade->userid .
                             '&returnto=' . s($PAGE->url->out(false));
 
-                        $context = context_course::instance($PAGE->course->id);
-                        if (has_capability('gradereport/transfer:transfer', $context)) {
-                            $transfernow = '<a href="' . $buttonurl . '" class="btn btn-default">' .
-                                get_string('transfergrade', 'gradereport_transfer') . '<a/>';
-                            $checkbox = '<input type="checkbox" class="usercheckbox" name="user' . $grade->userid . '" />';
-                        }
+                        $transferbutton = '<a href="' . $buttonurl . '" class="btn btn-default">' .
+                            get_string('transfergrade', 'gradereport_transfer') . '<a/>';
+                        $checkbox = '<input type="checkbox" class="usercheckbox" name="user' . $grade->userid . '" />';
 
                         $this->bulkactions = true;
                     }
+
                     $gradetransferred = "";
                 } else {
                     // The grade transfer has been successful.
@@ -277,6 +289,7 @@ class gradereport_transfer_renderer extends plugin_renderer_base
                     $gradetransferred = $grade->gradetransferred;
                 }
 
+                $transferstatus = ($transferstatus=="") ? $localprecheck : $transferstatus;
                 $timegraded = (empty($grade->timegraded)) ? get_string('notgraded', 'question') : userdate($grade->timegraded);
 
                 $context = context_course::instance($PAGE->course->id);
@@ -300,7 +313,7 @@ class gradereport_transfer_renderer extends plugin_renderer_base
                 $data[] = $timegraded;
                 $data[] = $gradetransferred;
                 $data[] = $transferstatus;
-                $data[] = $transfernow;
+                $data[] = $transferbutton;
                 $table->add_data($data);
             }
         }

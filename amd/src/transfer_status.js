@@ -32,7 +32,7 @@ define(['jquery', 'core/templates', 'core/ajax', 'core/config', 'core/yui'], fun
                 // Redirect to previous page.
                 var id = findGetParameter('id');
                 var mappingid = findGetParameter('mappingid');
-                window.location.href = 'http://essd.bath.ac.uk/moodle31/grade/report/transfer/index.php?id=' + id + '&mappingid=' + mappingid;
+                window.location.href = config.wwwroot + '/grade/report/transfer/index.php?id=' + id + '&mappingid=' + mappingid;
                 yuiDialogue.hide();
             },
             section: Y.WidgetStdMod.FOOTER
@@ -47,7 +47,9 @@ define(['jquery', 'core/templates', 'core/ajax', 'core/config', 'core/yui'], fun
             .split("&")
             .forEach(function (item) {
                 tmp = item.split("=");
-                if (tmp[0] === parameterName) result = decodeURIComponent(tmp[1]);
+                if (tmp[0] === parameterName){
+                    result = decodeURIComponent(tmp[1]);
+                }
             });
         return result;
     };
