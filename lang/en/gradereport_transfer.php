@@ -64,6 +64,7 @@ $string['nogradetotransfer'] = 'No grade to transfer into SAMIS';
 $string['wrongmaxgrade'] = 'Only grades out of 100 will be transferred';
 $string['gradenotinteger'] = 'Only grades that are whole numbers can be transferred';
 $string['willbetransferred'] = 'Will be transferred into SAMIS';
+$string['novalidgrade'] = 'No valid grade to transfer';
 $string['gradequeued'] = 'The grade has been queued for transfer';
 $string['thisnolongerexists'] = 'This assessment no longer exists in SAMIS with the parameters below';
 $string['mappingnotvalid'] = 'The destination assessment in SAMIS that was mapped to this Moodle activity no longer exists';
@@ -78,6 +79,9 @@ $string['eventgradereporttransfer'] = 'Grade transfer triggered';
 $string['onlymappedassessments'] = 'Only mapped assessments are listed';
 $string['canceltransfer'] = 'Cancel';
 $string['nocapabilitytotransfer'] = 'Your role does not have the capaiblity to transfer grades';
+$string['youhavechosen'] = 'You have chosen to transfer the grades listed below.';
+$string['clicktocomplete'] = 'Click the <span style= "font-weight:bold" class="text-success">Proceed with data transfer</span> button to complete the request or
+<span style= "font-weight:bold" class="text-danger">Cancel</span> to cancel the request and return to the previous screen.';
 
 // HELP ICONS.
 

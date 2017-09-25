@@ -426,14 +426,20 @@ class gradereport_transfer_renderer extends plugin_renderer_base
                     get_string('alreadytransferred', 'gradereport_transfer') . '</span>';
             } else if (empty($confirmitem->finalgrade)) {
                 $nogradetotransfercount++;
-                $status = '<span class="label label-warning transfer_status">' .
+                $status = '<span class="label label-danger transfer_status">' .
                     get_string('nogradetotransfer', 'gradereport_transfer') . '</span>';
             } else if ($confirmitem->rawgrademax != MAX_GRADE) {
+                $nogradetotransfercount++;
                 $status = '<span class="label label-danger transfer_status">' .
                     get_string('wrongmaxgrade', 'gradereport_transfer') . '</span>';
-            } else if ($this->is_already_in_queue($transferreport->id, $confirmitem->userid)) {
+            } else if ($confirmitem->finalgrade!=round($confirmitem->finalgrade)) {
+                $nogradetotransfercount++;
                 $status = '<span class="label label-danger transfer_status">' .
-                    'Already Added to Queue' . '</span>';
+                    get_string('gradenotinteger', 'gradereport_transfer') . '</span>';
+            } else if ($confirmitem->outcomeid==GRADE_QUEUED) {
+                $willbetransferredcount++;
+                $status = '<span class="label label-success transfer_status">' .
+                    get_string('gradequeued', 'gradereport_transfer') . '</span>';
                 $rowattributes = array('data-already-in-queue' => 1);
             } else {
                 $willbetransferredcount++;
@@ -458,18 +464,16 @@ class gradereport_transfer_renderer extends plugin_renderer_base
             /*}*/
         }
 
-        $output = "<div class=\"spotlight spotlight-v2\">
-<i class=\"fa fa-file-text fa-4x pull-left\" style=\"color:#38b9ec;\"></i>
-<h3>" . $transferreport->selected->samis_assessment_name . "</h3>
-<p>You have chosen to transfer the grades listed below.</p>
-<p>Click the <span style= 'font-weight:bold' class='text-success'>
-Proceed with data transfer</span> button to complete the request or
- <span style= 'font-weight:bold' class='text-danger'>Cancel</span> to cancel the request and return to the previous screen.<br></p>
-<ul class=\"list-style-1 colored\">
-<li>Will be transferred: <span class=\"badge\">$willbetransferredcount</span></li>
-<li>No grade to transfer: <span class=\"badge\"> $nogradetotransfercount</span></li>
+        $output = '<div class="spotlight spotlight-v2">
+<i class="fa fa-file-text fa-4x pull-left" style="color:#38b9ec;"></i>
+<h3>' . $transferreport->selected->samis_assessment_name . '</h3>
+<p>' . get_string('youhavechosen', 'gradereport_transfer') . '</p>
+<p>' . get_string('clicktocomplete', 'gradereport_transfer') . '<br></p>
+<ul class="list-style-1 colored">
+<li>' . get_string('willbetransferred', 'gradereport_transfer') . ': <span class="badge">' . $willbetransferredcount . '</span></li>
+<li>' . get_string('novalidgrade', 'gradereport_transfer') . ': <span class="badge">' . $nogradetotransfercount . '</span></li>
 </ul>
-</div>";
+</div>';
         $output .= html_writer::table($table);
         $output .= '<form action="index.php" method="post" id="transferconfirmed">';
         $output .= '<input type="hidden" name="confirmtransfer" value="1" />';
@@ -484,7 +488,7 @@ Proceed with data transfer</span> button to complete the request or
         $output .= '</form>';
         return $output;
     }
-
+/*
     private function is_already_in_queue($mappingid, $userid) {
         global $DB;
         // Get all adhoc queues.
@@ -500,6 +504,7 @@ Proceed with data transfer</span> button to complete the request or
         }
         return false;
     }
+*/
     /**
      * Output of formatted grade
      * @param object $grade
