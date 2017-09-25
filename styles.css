@@ -14,3 +14,12 @@
 #transfer_summary p {
     font-size: 20px;
 }
+
+.grades_transfer_summary {
+    font-size: 20px;
+    margin-top: 30px;
+}
+
+#grade_struct_summary .alert {
+    font-size: 16px;
+}
