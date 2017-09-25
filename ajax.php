@@ -24,20 +24,42 @@ require_sesskey();
 
 // Get submitted parameters.
 $confirmtransfer = required_param('confirmtransfer', PARAM_INT);
+$action = required_param('action', PARAM_RAW);
 $dotransfer = required_param('dotransfer', PARAM_TEXT);
 $courseid = required_param('id', PARAM_INT);
 $mappingid = required_param('mappingid', PARAM_INT);
-$users = required_param('users', PARAM_INT);
+$users = optional_param('users', 0, PARAM_INT);
 $context = context_course::instance($courseid);
 require_login($courseid);
 $gpr = new grade_plugin_return(array('type' => 'report', 'plugin' => 'transfer', 'courseid' => $courseid));
 $transferreport = new \gradereport_transfer\transfer_report($courseid, $gpr, $context, $mappingid);
+if ($action == 'grade_struct_exists') {
+    // Check that the grade structure exists.
+    if (isset($mappingid)) {
+        $assessmentmapping = \local_bath_grades_transfer_assessment_mapping::get($mappingid, true);
+        if (isset($assessmentmapping->lookup) && $objlookup = $assessmentmapping->lookup) {
+            $lookup = \local_bath_grades_transfer_assessment_lookup::get($objlookup->id);
+            $gradestructure = \local_bath_grades_transfer_assessment_grades::get_grade_strucuture_samis($lookup);
+            if (empty($gradestructure)) {
+                $transferstatus = new \gradereport_transfer\output\transfer_status
+                (null, 'grade_struct_empty', null, "GRADE STRUCTURE IS EMPTY");
+                echo json_encode($transferstatus);
+            } else {
+                $transferstatus = new \gradereport_transfer\output\transfer_status
+                (null, 'grade_struct_ok', null, "GRADE STRUCTURE PRESENT");
+                echo json_encode($transferstatus);
+            }
+        }
+    }
+    die;
+}
 if ($confirmtransfer == 1 && !empty($dotransfer)) {
     // Create a queue event.
     $event = \gradereport_transfer\event\grade_report_queue_grade_transfer::create(
         array(
             'context' => $context,
             'courseid' => $courseid,
+            'relateduserid' => $users[0],
             'other' => array(
                 'mappingid' => $mappingid,
                 'users' => $users
@@ -45,6 +67,9 @@ if ($confirmtransfer == 1 && !empty($dotransfer)) {
         )
     );
     $event->trigger();
+    // Log it as an outcome.
+    global $DB;
+
     // Come back to the user saying , grade is being processed !.
     $transferstatus = new \gradereport_transfer\output\transfer_status($users[0], 'queued', null, "Added to ADHOC QUEUE");
     echo json_encode($transferstatus);
