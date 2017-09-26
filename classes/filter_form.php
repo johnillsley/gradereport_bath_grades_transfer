@@ -73,6 +73,6 @@ class filter_form extends \moodleform
         $mform->setType('silast', PARAM_RAW);
 
         // Add a submit button.
-        $mform->addElement('submit', 'submitbutton', get_string('submit'));
+        $mform->addElement('submit', 'submitbutton', get_string('view'));
     }
 }
