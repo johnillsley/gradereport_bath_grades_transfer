@@ -71,7 +71,7 @@ if ($confirmtransfer == 1 && !empty($dotransfer)) {
     global $DB;
 
     // Come back to the user saying , grade is being processed !.
-    $transferstatus = new \gradereport_transfer\output\transfer_status($users[0], 'queued', null, "Added to ADHOC QUEUE");
+    $transferstatus = new \gradereport_transfer\output\transfer_status($users[0], 'queued', null, get_string('gradequeued', 'gradereport_transfer'));
     echo json_encode($transferstatus);
 }
 
