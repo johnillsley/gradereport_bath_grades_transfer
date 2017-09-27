@@ -417,13 +417,13 @@ class transfer_report extends \grade_report
                 $this->sqlfrom .= " AND log.outcomeid > 1";
                 break;
             case 3: // Not transferred yet.
-            $this->sqlfrom .= " AND log.outcomeid IS NULL";
+                $this->sqlfrom .= " AND log.outcomeid IS NULL";
                 break;
             case 4: // Ready to transfer.
                 $this->sqlfrom .= " AND (log.outcomeid NOT IN (1,8) OR log.outcomeid IS NULL) -- already transferred or queued
                                     AND gg.finalgrade IS NOT NULL
                                     AND CEIL(gg.finalgrade) = gg.finalgrade
-                                    AND gg.rawgrademax=".MAX_GRADE;
+                                    AND gg.rawgrademax=" . MAX_GRADE;
                 break;
         }
         $this->matchcount = $DB->count_records_sql("SELECT COUNT(ue.userid) " . $this->sqlfrom, $this->sqlparams);
