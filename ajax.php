@@ -24,7 +24,7 @@ require_sesskey();
 
 // Get submitted parameters.
 $confirmtransfer = required_param('confirmtransfer', PARAM_INT);
-$action = required_param('action', PARAM_RAW);
+$action = optional_param('action', '', PARAM_RAW);
 $dotransfer = required_param('dotransfer', PARAM_TEXT);
 $courseid = required_param('id', PARAM_INT);
 $mappingid = required_param('mappingid', PARAM_INT);
@@ -43,6 +43,14 @@ if ($action == 'grade_struct_exists') {
             if (empty($gradestructure)) {
                 $transferstatus = new \gradereport_transfer\output\transfer_status
                 (null, 'grade_struct_empty', null, "GRADE STRUCTURE IS EMPTY");
+                // Trigger an event.
+                $event = \local_bath_grades_transfer\event\missing_samis_grade_structure::create(
+                    array(
+                        'context' => $context,
+                        'courseid' => $courseid,
+                    )
+                );
+                $event->trigger();
                 echo json_encode($transferstatus);
             } else {
                 $transferstatus = new \gradereport_transfer\output\transfer_status
@@ -71,7 +79,8 @@ if ($confirmtransfer == 1 && !empty($dotransfer)) {
     global $DB;
 
     // Come back to the user saying , grade is being processed !.
-    $transferstatus = new \gradereport_transfer\output\transfer_status($users[0], 'queued', null, get_string('gradequeued', 'gradereport_transfer'));
+    $transferstatus = new \gradereport_transfer\output\transfer_status(
+        $users[0], 'queued', null, get_string('gradequeued', 'gradereport_transfer'));
     echo json_encode($transferstatus);
 }
 
