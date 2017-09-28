@@ -118,6 +118,7 @@ if (!empty($transferreport->selected->expired)) {
 }
 
 // PROCESS GRADE TRANSFERS.
+// TODO - Redundant as ajax.php is taking care of it ?.
 if ($confirmtransfer == 1 && !empty($dotransfer)) {
     // Log that transfer button has been clicked.
     $event = \gradereport_transfer\event\grade_report_starttransfer::create(
@@ -145,8 +146,14 @@ if (!empty($outcomeoutput)) {
     echo $outcomeoutput;
 }
 if ($confirmtransfer == 0 && !empty($dotransfer)) {
-    $transferlist = $transferreport->get_transfer_list($dotransfer);
-    echo $output->confirm_transfers($transferreport, $transferlist, $dotransfer);
+    if (!$transferreport->selected->is_blind_marking_turned_on) {
+        $transferlist = $transferreport->get_transfer_list($dotransfer);
+        echo $output->confirm_transfers($transferreport, $transferlist, $dotransfer);
+    } else {
+        echo "<div id='report_bath_transfer_blind' class=\"alert alert-danger\" role=\"alert\"><i class=\"fa fa-3x fa-eye-slash\" aria-hidden=\"true\"></i>
+                <span>BLIND MARKING IS TURNED ON, BUGGER OFF !!!</span></div> ";
+    }
+
 }
 // END PROCESS GRADE TRANSFER.
 
@@ -185,29 +192,36 @@ if (empty($dotransfer)) {
             $transferreport->silast = $silast;
             $transferreport->transferstatus = $transferstatus;
 
-            $module = array('name' => 'core_user', 'fullpath' => '/user/module.js');
-            $PAGE->requires->js_init_call('M.core_user.init_participation', null, false, $module);
 
-            echo '<form action="index.php" method="post" id="participantsform">';
-            echo '<div>';
-            echo '<input type="hidden" name="sesskey" value="' . sesskey() . '" />';
-            echo '<input type="hidden" name="mappingid" value="' . $transferreport->id . '" />';
-            echo '<input type="hidden" name="dotransfer" value="selected" />';
-            echo '<input type="hidden" name="returnto" value="' . s($PAGE->url->out(false)) . '" />';
-            echo "<h5>" . get_string('transferlog', 'gradereport_transfer') .
-                " (" . get_string('transferstatus' . $transferstatus, 'gradereport_transfer') . ")</h5>";
-            $output->grade_transfer_table($transferreport);
-            if ($output->bulkactions && $output->validmapping) {
-                // ADD CAPABILITY HERE.
-                $context = context_course::instance($course->id);
-                if (has_capability('gradereport/transfer:transfer', $context)) {
-                    echo $output->table_bulk_actions();
+            if (!$transferreport->selected->is_blind_marking_turned_on) {
+                $module = array('name' => 'core_user', 'fullpath' => '/user/module.js');
+                $PAGE->requires->js_init_call('M.core_user.init_participation', null, false, $module);
+
+                echo '<form action="index.php" method="post" id="participantsform">';
+                echo '<div>';
+                echo '<input type="hidden" name="sesskey" value="' . sesskey() . '" />';
+                echo '<input type="hidden" name="mappingid" value="' . $transferreport->id . '" />';
+                echo '<input type="hidden" name="dotransfer" value="selected" />';
+                echo '<input type="hidden" name="returnto" value="' . s($PAGE->url->out(false)) . '" />';
+                echo "<h5>" . get_string('transferlog', 'gradereport_transfer') .
+                    " (" . get_string('transferstatus' . $transferstatus, 'gradereport_transfer') . ")</h5>";
+                $output->grade_transfer_table($transferreport);
+                if ($output->bulkactions && $output->validmapping) {
+                    // ADD CAPABILITY HERE.
+                    $context = context_course::instance($course->id);
+                    if (has_capability('gradereport/transfer:transfer', $context)) {
+                        echo $output->table_bulk_actions();
+                    }
+
                 }
+                echo '</form>';
 
+                echo $output->table_name_search_form($transferreport, $baseurl);
+            } else {
+                echo "<div id='report_bath_transfer_blind' class=\"alert alert-danger\" role=\"alert\"><i class=\"fa fa-3x fa-eye-slash\" aria-hidden=\"true\"></i>
+                <span>BLIND MARKING IS TURNED ON, BUGGER OFF !!!</span></div> ";
             }
-            echo '</form>';
 
-            echo $output->table_name_search_form($transferreport, $baseurl);
 
             // END OF INDIVIDUAL GRADE TRANSFER TABLE.
 
