@@ -252,6 +252,10 @@ class transfer_report extends \grade_report
             $optionsexternal[$mapping->id] = $optionexternalstr;
             $moodlemodule = $DB->get_record($mapping->moodle_activity_type, array('id' => $mapping->instance));
             $mapping->moodle_activity_name = $moodlemodule->name;
+            // Condition for blind marking.
+            if (isset($moodlemodule->blindmarking)) {
+                $mapping->is_blind_marking_turned_on = $moodlemodule->blindmarking;
+            }
 
             // Drop down menu options for mapped moodle activities.
 
