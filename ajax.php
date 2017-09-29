@@ -33,6 +33,9 @@ $context = context_course::instance($courseid);
 require_login($courseid);
 $gpr = new grade_plugin_return(array('type' => 'report', 'plugin' => 'transfer', 'courseid' => $courseid));
 $transferreport = new \gradereport_transfer\transfer_report($courseid, $gpr, $context, $mappingid);
+if (isset($mappingid)) {
+    $assessmentmapping = \local_bath_grades_transfer_assessment_mapping::get($mappingid, true);
+}
 if ($action == 'grade_struct_exists') {
     // Check that the grade structure exists.
     if (isset($mappingid)) {
@@ -75,8 +78,17 @@ if ($confirmtransfer == 1 && !empty($dotransfer)) {
         )
     );
     $event->trigger();
+
     // Log it as an outcome.
-    global $DB;
+    $localgradestransferlog = new \local_bath_grades_transfer_log();
+    $localgradestransferlog->userid = $users[0];
+    $localgradestransferlog->gradetransfermappingid = $mappingid;
+    $localgradestransferlog->timetransferred = time();
+    $localgradestransferlog->gradetransferred = null;
+    $localgradestransferlog->coursemoduleid = $assessmentmapping->coursemodule;
+    $localgradestransferlog->outcomeid = GRADE_QUEUED;
+    $localgradestransferlog->assessmentlookupid = $assessmentmapping->assessmentlookupid;
+    $localgradestransferlog->save();
 
     // Come back to the user saying , grade is being processed !.
     $transferstatus = new \gradereport_transfer\output\transfer_status(
