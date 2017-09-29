@@ -80,6 +80,7 @@ $string['onlymappedassessments'] = 'Only mapped assessments are listed';
 $string['canceltransfer'] = 'Cancel';
 $string['nocapabilitytotransfer'] = 'Your role does not have the capaiblity to transfer grades';
 $string['youhavechosen'] = 'You have chosen to transfer the grades listed below.';
+$string['blind_marking_warning'] = 'Blind marking is currently enabled for this assignment.  Anonymity will need to be lifted before grades can be transferred to SAMIS.';
 $string['clicktocomplete'] = 'Click the <span style= "font-weight:bold" class="text-success">Proceed with data transfer</span> button to complete the request or
 <span style= "font-weight:bold" class="text-danger">Cancel</span> to cancel the request and return to the previous screen.';
 

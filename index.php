@@ -150,8 +150,9 @@ if ($confirmtransfer == 0 && !empty($dotransfer)) {
         $transferlist = $transferreport->get_transfer_list($dotransfer);
         echo $output->confirm_transfers($transferreport, $transferlist, $dotransfer);
     } else {
-        echo "<div id='report_bath_transfer_blind' class=\"alert alert-danger\" role=\"alert\"><i class=\"fa fa-3x fa-eye-slash\" aria-hidden=\"true\"></i>
-                <span>BLIND MARKING IS TURNED ON, BUGGER OFF !!!</span></div> ";
+        echo "<div id='report_bath_transfer_blind' class=\"alert alert-danger\" role=\"alert\">
+<i class=\"fa fa-3x fa-eye-slash\" aria-hidden=\"true\"></i><span> " . get_string('blind_marking_warning', 'gradereport_transfer') .
+            "</span></div> ";
     }
 
 }
@@ -218,8 +219,9 @@ if (empty($dotransfer)) {
 
                 echo $output->table_name_search_form($transferreport, $baseurl);
             } else {
-                echo "<div id='report_bath_transfer_blind' class=\"alert alert-danger\" role=\"alert\"><i class=\"fa fa-3x fa-eye-slash\" aria-hidden=\"true\"></i>
-                <span>BLIND MARKING IS TURNED ON, BUGGER OFF !!!</span></div> ";
+                echo "<div id='report_bath_transfer_blind' class=\"alert alert-danger\" role=\"alert\">
+<i class=\"fa fa-3x fa-eye-slash\" aria-hidden=\"true\"></i><span> " . get_string('blind_marking_warning', 'gradereport_transfer') .
+                    "</span></div> ";
             }
 
 
