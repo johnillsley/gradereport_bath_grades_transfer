@@ -117,7 +117,7 @@ class gradereport_transfer_renderer extends plugin_renderer_base
         $table->data[] = array(
             get_string('moodleactivitytype', 'gradereport_transfer') .
             $OUTPUT->help_icon('moodle_activity_type', 'gradereport_transfer'),
-            ($transferreport->selected->moodle_activity_type == 'assign' ? 'Assignment' : $transferreport->selected->moodle_activity_type )
+            ($transferreport->selected->moodle_activity_type == 'assign' ? 'Assignment' : $transferreport->selected->moodle_activity_type)
         );
         $table->data[] = array(
             get_string('moodleactivityname', 'gradereport_transfer') .
@@ -240,26 +240,27 @@ class gradereport_transfer_renderer extends plugin_renderer_base
                         // Transfer previously failed.
                         $transferstatus = '<span class="label label-danger">' .
                             get_string('transferfailed', 'gradereport_transfer') . '</span> ';
-                        $transferstatus .= userdate($grade->timetransferred)." - <strong>".$grade->transfer_outcome."</strong>";
+                        $transferstatus .= userdate($grade->timetransferred) . " -
+                        <strong>" . $grade->transfer_outcome . "</strong>";
                     }
 
                     if (is_null($grade->finalgrade)) { // Check if finalgrade exists.
-                        $localprecheck = '<span class="label label-danger">' .
+                        $localprecheck = '<span class="label label-info">' .
                             get_string('nogradetotransfer', 'gradereport_transfer') . '</span>';
                         $transferallowed = false;
 
                     } else if ($grade->finalgrade != round($grade->finalgrade)) { // Check if finalgrade is whole number.
-                        $localprecheck = '<span class="label label-danger">' .
+                        $localprecheck = '<span class="label label-info">' .
                             get_string('gradenotinteger', 'gradereport_transfer') . '</span>';
                         $transferallowed = false;
 
                     } else if ($grade->rawgrademax != MAX_GRADE) { // Check if finalgrade is out of 100.
-                        $localprecheck = '<span class="label label-danger">' .
+                        $localprecheck = '<span class="label label-info">' .
                             get_string('wrongmaxgrade', 'gradereport_transfer') . '</span>';
                         $transferallowed = false;
 
                     } else { // Grade is ready to be transferred.
-                        $localprecheck = '<span class="label label-warning">' .
+                        $localprecheck = '<span class="label label-success">' .
                             get_string('transferpending', 'gradereport_transfer') . '</span>';
                     }
 
@@ -417,24 +418,24 @@ class gradereport_transfer_renderer extends plugin_renderer_base
         );
         foreach ($confirmlist as $confirmitem) {
             $user = $DB->get_record('user', array('id' => $confirmitem->userid));
-            if (is_null($confirmitem->finalgrade)) {
+            if (is_null($confirmitem->finalgrade) || $confirmitem->finalgrade != round($confirmitem->finalgrade)) {
                 continue;
             }
             $graded = (empty($confirmitem->timegraded)) ? get_string('notgraded', 'question') : userdate($confirmitem->timegraded);
             if ($confirmitem->outcomeid == 1) {
-                $status = '<span class="label label-warning transfer_status">' .
+                $status = '<span class="label label-success transfer_status">' .
                     get_string('alreadytransferred', 'gradereport_transfer') . '</span>';
             } else if (empty($confirmitem->finalgrade)) {
                 $nogradetotransfercount++;
-                $status = '<span class="label label-danger transfer_status">' .
+                $status = '<span class="label label-info transfer_status">' .
                     get_string('nogradetotransfer', 'gradereport_transfer') . '</span>';
             } else if ($confirmitem->rawgrademax != MAX_GRADE) {
                 $nogradetotransfercount++;
-                $status = '<span class="label label-danger transfer_status">' .
+                $status = '<span class="label label-info transfer_status">' .
                     get_string('wrongmaxgrade', 'gradereport_transfer') . '</span>';
             } else if ($confirmitem->finalgrade != round($confirmitem->finalgrade)) {
                 $nogradetotransfercount++;
-                $status = '<span class="label label-danger transfer_status">' .
+                $status = '<span class="label label-info transfer_status">' .
                     get_string('gradenotinteger', 'gradereport_transfer') . '</span>';
             } else if ($confirmitem->outcomeid == GRADE_QUEUED) {
                 $willbetransferredcount++;
@@ -522,7 +523,7 @@ class gradereport_transfer_renderer extends plugin_renderer_base
 
         $actualgrade = (float)$grade->finalgrade;
         $maxgrade = (float)$grade->rawgrademax;
-        $gradedisplay = (round($actualgrade)==$actualgrade) ? $actualgrade : '<span class="max_grade_warning">' . $actualgrade . '</span>';
+        $gradedisplay = (round($actualgrade) == $actualgrade) ? $actualgrade : '<span class="max_grade_warning">' . $actualgrade . '</span>';
         $maxdisplay = ($maxgrade == MAX_GRADE) ? $maxgrade : '<span class="max_grade_warning">' . $maxgrade . '</span>';
         return (!empty($grade->finalgrade)) ? $gradedisplay . ' / ' . $maxdisplay : '';
     }
