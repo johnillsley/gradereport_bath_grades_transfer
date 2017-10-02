@@ -214,6 +214,9 @@ class gradereport_transfer_renderer extends plugin_renderer_base
         $table->is_persistent(true);
         $table->initialbars(true);
 
+        $table->pagesize  = $transferreport->perpage;
+        $table->use_pages = true;
+
         $gradelist = $transferreport->user_list($table);
         $table->pagesize($transferreport->perpage, $transferreport->matchcount);
 
@@ -227,6 +230,7 @@ class gradereport_transfer_renderer extends plugin_renderer_base
                 $checkbox = '';
                 $transferbutton = '';
                 $transferstatus = '';
+                $localprecheck = '';
                 $transferallowed = true;
 
                 if ($grade->outcomeid != 1) {
@@ -241,9 +245,15 @@ class gradereport_transfer_renderer extends plugin_renderer_base
                         $transferstatus = '<span class="label label-danger">' .
                             get_string('transferfailed', 'gradereport_transfer') . '</span> ';
                         $transferstatus .= userdate($grade->timetransferred)." - <strong>".$grade->transfer_outcome."</strong>";
+
+                    } else {
+                        // Grade is ready to be transferred.
+                        $transferstatus = '<span class="label label-warning">' .
+                            get_string('transferpending', 'gradereport_transfer') . '</span>';
                     }
 
-                    if (is_null($grade->finalgrade)) { // Check if finalgrade exists.
+                    // LOCAL PRE TRANSFER CHECKS
+                    if (empty($grade->finalgrade)) { // Check if finalgrade exists.
                         $localprecheck = '<span class="label label-danger">' .
                             get_string('nogradetotransfer', 'gradereport_transfer') . '</span>';
                         $transferallowed = false;
@@ -258,9 +268,6 @@ class gradereport_transfer_renderer extends plugin_renderer_base
                             get_string('wrongmaxgrade', 'gradereport_transfer') . '</span>';
                         $transferallowed = false;
 
-                    } else { // Grade is ready to be transferred.
-                        $localprecheck = '<span class="label label-warning">' .
-                            get_string('transferpending', 'gradereport_transfer') . '</span>';
                     }
 
                     if ($transferallowed == true && has_capability('gradereport/transfer:transfer', $context)) {
@@ -287,7 +294,7 @@ class gradereport_transfer_renderer extends plugin_renderer_base
                     $gradetransferred = $grade->gradetransferred;
                 }
 
-                $transferstatus = ($transferstatus == "") ? $localprecheck : $transferstatus;
+                $transferstatus = (!empty($localprecheck)) ? $localprecheck : $transferstatus;
                 $timegraded = (empty($grade->timegraded)) ? get_string('notgraded', 'question') : userdate($grade->timegraded);
 
                 $context = context_course::instance($PAGE->course->id);

@@ -32,7 +32,7 @@ require_once($CFG->dirroot . '/local/bath_grades_transfer/lib.php');
 // Grade report transfer table constants
 define('USER_SMALL_CLASS', 20);   // Below this is considered small.
 define('USER_LARGE_CLASS', 200);  // Above this is considered large.
-define('DEFAULT_PAGE_SIZE', 15);
+define('DEFAULT_PAGE_SIZE', 20);
 define('SHOW_ALL_PAGE_SIZE', 5000);
 define('MODE_USERDETAILS', 1);
 
@@ -192,7 +192,6 @@ if (empty($dotransfer)) {
             $transferreport->sifirst = $sifirst;
             $transferreport->silast = $silast;
             $transferreport->transferstatus = $transferstatus;
-
 
             if (!$transferreport->selected->is_blind_marking_turned_on) {
                 $module = array('name' => 'core_user', 'fullpath' => '/user/module.js');

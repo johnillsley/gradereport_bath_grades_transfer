@@ -139,6 +139,12 @@ class transfer_report extends \grade_report
         WHERE gm.id = :id
         ";
         $this->sqlparams['id'] = $this->id;
+
+        $this->sqlreadytotransfer = " 
+        AND (log.outcomeid NOT IN (".TRANSFER_SUCCESS.",".GRADE_QUEUED.") OR log.outcomeid IS NULL) -- already transferred or queued
+        AND gg.finalgrade IS NOT NULL
+        AND CEIL(gg.finalgrade) = gg.finalgrade
+        AND gg.rawgrademax=" . MAX_GRADE;
     }
 
     /**
@@ -273,7 +279,7 @@ class transfer_report extends \grade_report
      */
     public function get_status_options() {
         $options = array();
-        for ($statusid = 0; $statusid < 5; $statusid++) {
+        for ($statusid = 0; $statusid < 6; $statusid++) {
             $options[] = get_string('transferstatus' . $statusid, 'gradereport_transfer');
         }
         return $options;
@@ -356,7 +362,7 @@ class transfer_report extends \grade_report
     public function do_transfers($transferlist = array()) {
         // Require local plugin class.
         $gradetransfers = new \local_bath_grades_transfer();
-        $responses = $gradetransfers->transfer_mapping($this->id, $transferlist);
+        $responses = $gradetransfers->transfer_mapping2($this->id, $transferlist);
         return $responses;
     }
 
@@ -375,6 +381,16 @@ class transfer_report extends \grade_report
                 " . $this->sqlfrom, $this->sqlparams);
 
         return ($rs);
+    }
+
+    /**
+     * Returns total count of students in grade transfer without any filters
+     * @param object $table - required for paging information
+     * @return moodle_recordset $rs
+     */
+    public function gettotalcount() {
+        global $DB;
+
     }
 
     /**
@@ -415,19 +431,19 @@ class transfer_report extends \grade_report
 
         switch ($this->transferstatus) {
             case 1: // Completed transfers.
-                $this->sqlfrom .= " AND log.outcomeid = 1";
+                $this->sqlfrom .= " AND log.outcomeid = ".TRANSFER_SUCCESS;
                 break;
             case 2: // Failed transfers.
-                $this->sqlfrom .= " AND log.outcomeid > 1";
+                $this->sqlfrom .= " AND log.outcomeid IN (2,3,4,5,6,7,9,10)";
                 break;
             case 3: // Not transferred yet.
                 $this->sqlfrom .= " AND log.outcomeid IS NULL";
                 break;
             case 4: // Ready to transfer.
-                $this->sqlfrom .= " AND (log.outcomeid NOT IN (1,8) OR log.outcomeid IS NULL) -- already transferred or queued
-                                    AND gg.finalgrade IS NOT NULL
-                                    AND CEIL(gg.finalgrade) = gg.finalgrade
-                                    AND gg.rawgrademax=" . MAX_GRADE;
+                $this->sqlfrom .= $this->sqlreadytotransfer;
+                break;
+            case 5: // In transfer queue
+                $this->sqlfrom .= " AND log.outcomeid = ".GRADE_QUEUED;
                 break;
         }
         $this->matchcount = $DB->count_records_sql("SELECT COUNT(ue.userid) " . $this->sqlfrom, $this->sqlparams);
@@ -467,7 +483,11 @@ class transfer_report extends \grade_report
         } else {
             $subsetsql = "";
         }
-        $orderby = "ORDER BY log.outcomeid DESC,IF(gg.finalgrade > 0,1,0) DESC,u.lastname ASC,u.firstname ASC";
+
+        // Only show grades that are allowed to be transferred now
+        $subsetsql .= $this->sqlreadytotransfer;
+
+        $orderby = ' ORDER BY log.outcomeid DESC,IF(gg.finalgrade > 0,1,0) DESC,u.lastname ASC,u.firstname ASC';
         $rs = $DB->get_records_sql("
             SELECT
               ue.userid
