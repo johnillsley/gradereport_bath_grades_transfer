@@ -45,8 +45,7 @@ class gradereport_transfer_renderer extends plugin_renderer_base
      * @param transfer report object $transferreport
      * @return string
      */
-    public function selected_mapping_overview($transferreport)
-    {
+    public function selected_mapping_overview($transferreport) {
         global $CFG, $DB, $OUTPUT, $PAGE;
         $editpageurl = $CFG->wwwroot . '/course/modedit.php?update=' . $transferreport->selected->coursemoduleid;
         $gradespageurl = $CFG->wwwroot . '/mod/' .
@@ -112,8 +111,20 @@ class gradereport_transfer_renderer extends plugin_renderer_base
             $transferreport->selected->academicyear
         );
         $table->data[] = array(
-            get_string('mappingcategory', 'gradereport_transfer'),
+            get_string('periodslotcode', 'gradereport_transfer'),
             $transferreport->selected->periodslotcode
+        );
+        $table->data[] = array(
+            get_string('mabseq', 'gradereport_transfer'),
+            $transferreport->selected->mabseq
+        );
+        $table->data[] = array(
+            get_string('astcode', 'gradereport_transfer'),
+            $transferreport->selected->astcode
+        );
+        $table->data[] = array(
+            get_string('mabperc', 'gradereport_transfer'),
+            $transferreport->selected->mabperc
         );
         $table->data[] = array(
             get_string('moodleactivitytype', 'gradereport_transfer') .
@@ -152,8 +163,7 @@ class gradereport_transfer_renderer extends plugin_renderer_base
      * @param transfer report object $transferreport
      * @return string
      */
-    public function grade_transfer_table($transferreport)
-    {
+    public function grade_transfer_table($transferreport) {
         global $PAGE, $OUTPUT, $USER, $CFG, $DB;
 
         $table = new flexible_table('user-grade-transfer-' . $PAGE->course->id);
@@ -332,8 +342,7 @@ class gradereport_transfer_renderer extends plugin_renderer_base
      * Output of options for bulk transfer operations available to the user
      * @return string
      */
-    public function table_bulk_actions()
-    {
+    public function table_bulk_actions() {
         global $PAGE;
 
         // Bulk actions at bottom of table.
@@ -365,8 +374,7 @@ class gradereport_transfer_renderer extends plugin_renderer_base
      * @param moodle_url object $baseurl - additional form parameters that are needed to return to the correct mapping
      * @return string
      */
-    public function table_name_search_form($transferreport, $baseurl)
-    {
+    public function table_name_search_form($transferreport, $baseurl) {
         global $OUTPUT, $PAGE;
 
         $totalcount = $transferreport->totalcount;
@@ -412,8 +420,7 @@ class gradereport_transfer_renderer extends plugin_renderer_base
      * @param string $dotransfer
      * @return string
      */
-    public function confirm_transfers($transferreport, $transferlist, $dotransfer)
-    {
+    public function confirm_transfers($transferreport, $transferlist, $dotransfer) {
         global $DB, $PAGE, $OUTPUT;
         $willbetransferredcount = $nogradetotransfercount = 0;
         $confirmlist = $transferreport->confirm_list($transferlist);
@@ -529,8 +536,7 @@ class gradereport_transfer_renderer extends plugin_renderer_base
      * @param object $grade
      * @return string
      */
-    private function display_grade($grade)
-    {
+    private function display_grade($grade) {
 
         $actualgrade = (float)$grade->finalgrade;
         $maxgrade = (float)$grade->rawgrademax;
@@ -539,8 +545,7 @@ class gradereport_transfer_renderer extends plugin_renderer_base
         return (!empty($grade->finalgrade)) ? $gradedisplay . ' / ' . $maxdisplay : '';
     }
 
-    public function render_transfer_status(\templatable $transferstatus)
-    {
+    public function render_transfer_status(\templatable $transferstatus) {
         global $DB;
         $data = $transferstatus->export_for_template($this);
         $data->fullname = fullname($DB->get_record('user', ['id' => $data->userid]));

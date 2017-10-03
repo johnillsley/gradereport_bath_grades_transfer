@@ -83,8 +83,7 @@ class transfer_report extends \grade_report
      * grade_report_bath_transfer constructor.
      * @param integer $mappingid
      */
-    public function __construct($courseid, $gpr, $context, $mappingid)
-    {
+    public function __construct($courseid, $gpr, $context, $mappingid) {
         parent::__construct($courseid, $gpr, $context);
 
         $this->id = $mappingid;
@@ -141,7 +140,7 @@ class transfer_report extends \grade_report
         ";
         $this->sqlparams['id'] = $this->id;
 
-        $this->sqlreadytotransfer = " 
+        $this->sqlreadytotransfer = "
         AND (log.outcomeid NOT IN (" . TRANSFER_SUCCESS . "," . GRADE_QUEUED . ") OR log.outcomeid IS NULL) -- already transferred or queued
         AND gg.finalgrade IS NOT NULL
         AND CEIL(gg.finalgrade) = gg.finalgrade
@@ -154,8 +153,7 @@ class transfer_report extends \grade_report
      * @param array $data
      * @return void
      */
-    public function process_data($data)
-    {
+    public function process_data($data) {
 
     }
 
@@ -165,8 +163,7 @@ class transfer_report extends \grade_report
      * @param string $action Which action to take (edit, delete etc...)
      * @return void
      */
-    public function process_action($target, $action)
-    {
+    public function process_action($target, $action) {
 
     }
 
@@ -176,8 +173,7 @@ class transfer_report extends \grade_report
      * Gets all academic year options used within external assessments.
      * @return array $years - all distinct academic years that exist in
      */
-    public function get_academic_year_options()
-    {
+    public function get_academic_year_options() {
         global $DB;
 
         $years = array();
@@ -195,8 +191,7 @@ class transfer_report extends \grade_report
      * @param string $year (optional)
      * @return void
      */
-    public function get_mapping_options($courseid, $year = null)
-    {
+    public function get_mapping_options($courseid, $year = null) {
         global $DB;
 
         // Mapping lookups refreshed from cron on local plugin - so need to to refresh here!
@@ -225,6 +220,8 @@ class transfer_report extends \grade_report
             , gl.academicyear
             , gl.occurrence
             , gl.mabseq
+            ,gl.astcode
+            ,gl.mabperc
             , gl.periodslotcode
             , gl.expired
             , cm.course
@@ -282,8 +279,7 @@ class transfer_report extends \grade_report
      * Get the report filter options
      * @return array $options
      */
-    public function get_status_options()
-    {
+    public function get_status_options() {
         $options = array();
         for ($statusid = 0; $statusid < 6; $statusid++) {
             $options[] = get_string('transferstatus' . $statusid, 'gradereport_transfer');
@@ -296,8 +292,7 @@ class transfer_report extends \grade_report
      * @param string $dotransfer determines the how the list is derived - all/selected/single
      * @return array $transferlist - userids
      */
-    public function get_transfer_list($dotransfer)
-    {
+    public function get_transfer_list($dotransfer) {
 
         switch ($dotransfer) {
             case 'all':
@@ -319,8 +314,7 @@ class transfer_report extends \grade_report
      * @return array $transferlist - userids
      */
     // TODO - this should be replaced by local plugin method?
-    private function get_all_users()
-    {
+    private function get_all_users() {
         $userids = array();
 
         $users = $this->confirm_list();
@@ -334,8 +328,7 @@ class transfer_report extends \grade_report
      * Get selected students from form POST data
      * @return array $userids - userids
      */
-    private function get_selected_users()
-    {
+    private function get_selected_users() {
         $userids = array();
 
         foreach ($_POST as $k => $v) {
@@ -355,8 +348,7 @@ class transfer_report extends \grade_report
      * Put single student in an array so compatible with all & selected transfers
      * @return array containing single userid
      */
-    private function get_individual_user($userid)
-    {
+    private function get_individual_user($userid) {
         if ($userid > 0) {
             return array($userid);
         } else {
@@ -369,8 +361,7 @@ class transfer_report extends \grade_report
      * @param array $transferlist - userids
      * @return array containing single userid
      */
-    public function do_transfers($transferlist = array())
-    {
+    public function do_transfers($transferlist = array()) {
         // Require local plugin class.
         $gradetransfers = new \local_bath_grades_transfer();
         $responses = $gradetransfers->transfer_mapping2($this->id, $transferlist);
@@ -381,8 +372,7 @@ class transfer_report extends \grade_report
      * Returns summary data regarding the mapped transfer - total expected grades, graded in moodle & actual transferred so far
      * @return object $rs single database record
      */
-    public function get_progress()
-    {
+    public function get_progress() {
         global $DB;
 
         $rs = $DB->get_record_sql("
@@ -400,8 +390,7 @@ class transfer_report extends \grade_report
      * @param object $table - required for paging information
      * @return moodle_recordset $rs
      */
-    public function user_list($table)
-    {
+    public function user_list($table) {
         global $DB;
 
         $limitfrom = $table->get_page_start();
@@ -477,8 +466,7 @@ class transfer_report extends \grade_report
      * @param array $tansfer_list - userids
      * @return array $rs of objects
      */
-    public function confirm_list($transferlist = array())
-    {
+    public function confirm_list($transferlist = array()) {
         global $DB;
         if (count($transferlist) > 0) {
             list($insql, $inparams) = $DB->get_in_or_equal($transferlist, SQL_PARAMS_NAMED);
