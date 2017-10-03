@@ -270,10 +270,11 @@ class gradereport_transfer_renderer extends plugin_renderer_base
                             get_string('wrongmaxgrade', 'gradereport_transfer') . '</span>';
                         $transferallowed = false;
 
-                    }
+
                     } else { // Grade is ready to be transferred.
                         $localprecheck = '<span class="label label-success">' .
                             get_string('transferpending', 'gradereport_transfer') . '</span>';
+                    }
 
                     if ($transferallowed == true && has_capability('gradereport/transfer:transfer', $context)) {
 
