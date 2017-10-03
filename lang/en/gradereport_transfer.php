@@ -26,7 +26,10 @@
 $string['pluginname'] = 'Grade transfer';
 $string['mappingitem'] = 'SAMIS assessment Name';
 $string['mappingreference'] = 'SAMIS Assessment Code';
-$string['mappingcategory'] = 'Period Slot Code';
+$string['periodslotcode'] = 'Period Slot Code';
+$string['mabseq'] = 'MAB Sequence';
+$string['astcode'] = 'AST Code';
+$string['mabperc'] = 'MAB Percentage';
 $string['datefrom'] = 'Submission date after';
 $string['dateto'] = 'Submission date before';
 $string['transferstatus'] = 'Transfer status';
