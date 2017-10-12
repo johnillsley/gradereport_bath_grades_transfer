@@ -63,7 +63,7 @@ class gradereport_transfer_renderer extends plugin_renderer_base
             ' ' : get_string('lastmodifiedby', 'question') . ' ';
         $activityprogress = $transferreport->get_progress();
 
-        $warning = (!empty($transferreport->selected->locked)) ? ' <span class="label label-warning">' .
+        $warning = (!empty($transferreport->selected->locked)) ? ' <span class="label label-warning"> <i class="fa fa-lock"></i> ' .
             get_string('locked', 'grades') . '</span>' : '';
         // Current status indicator
         if ($this->validmapping === false) { // TODO - USE CLASS IN LOCAL PLUGIN TO CHECK IF MAPPING IS VALID
@@ -136,7 +136,7 @@ class gradereport_transfer_renderer extends plugin_renderer_base
             get_string('moodleactivityname', 'gradereport_transfer') .
             $OUTPUT->help_icon('moodle_activity_name', 'gradereport_transfer'),
             '<strong>' . $transferreport->selected->moodle_activity_name .
-            '</strong> (<a href="' . $editpageurl . '">' . get_string('editsettings') . '</a>)'
+            '</strong> ( <i class="fa fa-pencil"></i> <a href="' . $editpageurl . '">' . get_string('editsettings') . '</a> )'
         );
         $table->data[] = array(
             get_string('moodleactivitycompletion', 'gradereport_transfer') .
