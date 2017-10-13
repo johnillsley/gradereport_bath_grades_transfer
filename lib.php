@@ -45,6 +45,7 @@ class transfer_report extends \grade_report
      * @var FROM part of SQL used by class methods.
      */
     private $sqlfrom;
+    private $sqlreadytotransfer;
     /**
      * @var FROM parameters for all SQL in class.
      */
@@ -388,7 +389,7 @@ class transfer_report extends \grade_report
     /**
      * Returns user data with grades and transfer status required to populate the report table
      * @param object $table - required for paging information
-     * @return moodle_recordset $rs
+     * @return \moodle_recordset $rs
      */
     public function user_list($table) {
         global $DB;
@@ -434,7 +435,7 @@ class transfer_report extends \grade_report
             case 4: // Ready to transfer.
                 $this->sqlfrom .= $this->sqlreadytotransfer;
                 break;
-            case 5: // In transfer queue
+            case 5: // In transfer queue.
                 $this->sqlfrom .= " AND log.outcomeid = " . GRADE_QUEUED;
                 break;
         }
@@ -476,7 +477,7 @@ class transfer_report extends \grade_report
             $subsetsql = "";
         }
 
-        // Only show grades that are allowed to be transferred now
+        // Only show grades that are allowed to be transferred now.
         $subsetsql .= $this->sqlreadytotransfer;
 
         $orderby = ' ORDER BY u.lastname ASC,u.firstname ASC';

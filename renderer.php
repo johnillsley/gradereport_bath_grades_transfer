@@ -63,7 +63,8 @@ class gradereport_transfer_renderer extends plugin_renderer_base
             ' ' : get_string('lastmodifiedby', 'question') . ' ';
         $activityprogress = $transferreport->get_progress();
 
-        $warning = (!empty($transferreport->selected->locked)) ? ' <span class="label label-warning">' . get_string('locked', 'grades') . '</span>' : '';
+        $warning = (!empty($transferreport->selected->locked)) ? ' <span class="label label-warning"> <i class="fa fa-lock"></i> ' .
+            get_string('locked', 'grades') . '</span>' : '';
         // Current status indicator
         if ($this->validmapping === false) { // TODO - USE CLASS IN LOCAL PLUGIN TO CHECK IF MAPPING IS VALID
             // Transfer mapping no longer valid.
@@ -135,7 +136,7 @@ class gradereport_transfer_renderer extends plugin_renderer_base
             get_string('moodleactivityname', 'gradereport_transfer') .
             $OUTPUT->help_icon('moodle_activity_name', 'gradereport_transfer'),
             '<strong>' . $transferreport->selected->moodle_activity_name .
-            '</strong> (<a href="' . $editpageurl . '">' . get_string('editsettings') . '</a>)'
+            '</strong> ( <i class="fa fa-pencil"></i> <a href="' . $editpageurl . '">' . get_string('editsettings') . '</a> )'
         );
         $table->data[] = array(
             get_string('moodleactivitycompletion', 'gradereport_transfer') .
@@ -244,12 +245,11 @@ class gradereport_transfer_renderer extends plugin_renderer_base
                 $transferstatus = '';
                 $localprecheck = '';
                 $transferallowed = true;
-
                 if ($grade->outcomeid != 1) {
-                    // The grade has not been succesfully transferred yet.
+                    // The grade has not been successfully transferred yet.
                     if ($grade->outcomeid == GRADE_QUEUED) {
                         $transferstatus = '<span class="label label-warning">' .
-                            $grade->transfer_outcome . '</span> ' . userdate($grade->timetransferred);
+                            $grade->transfer_outcome . '</span> ' . '<span class="label label-info">' . userdate($grade->timetransferred) . '</span>';
                         $transferallowed = false;
 
                     } else if ($grade->outcomeid > 1) {
@@ -301,7 +301,9 @@ class gradereport_transfer_renderer extends plugin_renderer_base
                     $gradetransferred = "";
                 } else {
                     // The grade transfer has been successful.
-                    $transferstatus = get_string('transferredon', 'gradereport_transfer') . ' ' . userdate($grade->timetransferred);
+                    $transferstatus = '<span class="label label-success">' .
+                        get_string('transferredon', 'gradereport_transfer') . ' ' .
+                        userdate($grade->timetransferred) . '</span>';
                     $gradetransferred = $grade->gradetransferred;
                 }
 
