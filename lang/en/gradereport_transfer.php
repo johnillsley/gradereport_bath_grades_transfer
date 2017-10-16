@@ -108,3 +108,6 @@ $string['transfer_status'] = 'Transfer Status';
 // EVENTS.
 $string['gradereport_transfer_queue'] = 'Grade Transfer Queue';
 $string['processqueuedgrades'] = 'Process Queued Grades to Transfer';
+// Capability.
+$string['transfer:transfer'] = 'Transfer Grades to SAMIS';
+$string['transfer:view'] = 'View Grade Transfer Report';
