@@ -22,10 +22,9 @@ define(['jquery', 'core/templates', 'core/ajax', 'core/config', 'core/yui'], fun
             label: 'OK',
             action: function (e) {
                 e.preventDefault();
-                // Redirect to previous page.
-                var id = findGetParameter('id');
-                var mappingid = findGetParameter('mappingid');
-                window.location.href = config.wwwroot + '/grade/report/transfer/index.php?id=' + id + '&mappingid=' + mappingid;
+                var form = $('#transferconfirmed');
+                var data = form.serializeArray();
+                window.location.href = config.wwwroot + '/grade/report/transfer/index.php?id=' + data[3].value + '&mappingid=' + data[4].value;
                 yuiDialogue.hide();
             },
             section: Y.WidgetStdMod.FOOTER
@@ -53,20 +52,6 @@ define(['jquery', 'core/templates', 'core/ajax', 'core/config', 'core/yui'], fun
             + "</div>";
         var yuiDialogue = dialogueBuilder('Summary', body);
         yuiDialogue.show();
-    };
-    var findGetParameter = function (parameterName) {
-        var result = null,
-            tmp = [];
-        location.search
-            .substr(1)
-            .split("&")
-            .forEach(function (item) {
-                tmp = item.split("=");
-                if (tmp[0] === parameterName) {
-                    result = decodeURIComponent(tmp[1]);
-                }
-            });
-        return result;
     };
     /*
      Send a single grade to the queueing mechanism.
@@ -190,6 +175,7 @@ define(['jquery', 'core/templates', 'core/ajax', 'core/config', 'core/yui'], fun
         $(node).attr('disabled', true);
         var form = $('#transferconfirmed');
         var data = form.serializeArray();
+        console.log(data);
         $(node).next().html('Go Back').attr('href', config.wwwroot + '/grade/report/transfer/index.php?id='
             + data[3].value +
             '&mappingid=' +
