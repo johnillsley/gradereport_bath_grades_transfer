@@ -213,6 +213,7 @@ class gradereport_transfer_renderer extends plugin_renderer_base
         $table->set_attribute('cellspacing', '0');
         $table->set_attribute('id', 'gradetransfers');
         $table->set_attribute('class', 'generaltable generalbox');
+        $table->sort_default_column = 'timegraded';
 
         $table->set_control_variables(array(
             TABLE_VAR_SORT => 'ssort',
