@@ -80,7 +80,9 @@ class gradereport_transfer_renderer extends plugin_renderer_base
                 get_string('scheduletransfer', 'gradereport_transfer') . '</a></strong>';
             $status .= get_string('triggermanually', 'gradereport_transfer');
             $context = context_course::instance($PAGE->course->id);
-            if (has_capability('gradereport/transfer:transfer', $context) && !$transferreport->selected->is_blind_marking_turned_on) {
+            if (has_capability('gradereport/transfer:transfer', $context) &&
+                !$transferreport->selected->is_blind_marking_turned_on
+            ) {
                 $status .= '<br/><a class="btn btn-default" href="' . $dotransfersurl . '">' .
                     get_string('transferall', 'gradereport_transfer') . '</a>';
             }
@@ -130,7 +132,8 @@ class gradereport_transfer_renderer extends plugin_renderer_base
         $table->data[] = array(
             get_string('moodleactivitytype', 'gradereport_transfer') .
             $OUTPUT->help_icon('moodle_activity_type', 'gradereport_transfer'),
-            ($transferreport->selected->moodle_activity_type == 'assign' ? 'Assignment' : $transferreport->selected->moodle_activity_type)
+            ($transferreport->selected->moodle_activity_type == 'assign' ?
+                'Assignment' : $transferreport->selected->moodle_activity_type)
         );
         $table->data[] = array(
             get_string('moodleactivityname', 'gradereport_transfer') .
@@ -192,6 +195,9 @@ class gradereport_transfer_renderer extends plugin_renderer_base
 
         $tablecolumns[] = 'timetransferred';
         $tableheaders[] = get_string('transferstatus', 'gradereport_transfer');
+
+        $tablecolumns[] = 'transferhistory';
+        $tableheaders[] = 'Transfer History';
 
         $tablecolumns[] = 'transfernow';
         $tableheaders[] = get_string('dotransfernow', 'gradereport_transfer');
@@ -332,6 +338,8 @@ class gradereport_transfer_renderer extends plugin_renderer_base
                 $data[] = $timegraded;
                 $data[] = $gradetransferred;
                 $data[] = $transferstatus;
+                $data[] = '<a  data-user-id = ' . $user->id . ' href = "#" class=" get_transfer_logs btn btn-info">
+                            <i class="fa fa-history" aria-hidden="true"></i></a>';
                 $data[] = $transferbutton;
                 $table->add_data($data);
             }
