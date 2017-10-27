@@ -10,7 +10,7 @@ define(['jquery', 'core/templates', 'core/ajax', 'core/config', 'core/yui', 'cor
             url: URL
         }).done(function (log_data) {
             var yuiDialogue = new M.core.dialogue({
-                headerContent: 'Transfer Logs',
+                headerContent: 'Transfer Logs [ Last 20 entries]',
                 draggable: false,
                 bodyContent: '',
                 visible: false,
