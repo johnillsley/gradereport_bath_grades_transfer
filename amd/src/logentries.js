@@ -67,10 +67,8 @@ define(['jquery', 'core/templates', 'core/ajax', 'core/config', 'core/yui', 'cor
                 e.preventDefault();
                 // First make sure the grade structure is not empty
                 var userid = $(this).data('user-id');
-                console.log(userid);
-                var mappingid = 11;
-                //hide any previous YUI Dialogue
-                getLogs(userid, mappingid);
+                var mappingid = $(this).data('mapping-id');
+                 getLogs(userid, mappingid);
             });
         }
     };
