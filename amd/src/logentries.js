@@ -21,28 +21,32 @@ define(['jquery', 'core/templates', 'core/ajax', 'core/config', 'core/yui', 'cor
                 hideaftersubmit: false
             });
             if (log_data !== null) {
-                $.each(log_data, function (i, object) {
-                    var outcomeid = object.id;
-                    if (outcomeid == 1) {
-                        //Its a success
-                        alertclass = 'text-success';
-                    }
-                    else if (outcomeid == 3) {
-                        alertclass = 'text-danger';
-                    }
-                    else if (outcomeid == 8) {
-                        alertclass = 'text-info';
-                    }
-                    else {
-                        alertclass = 'text-warning';
+                //if logs are empty , show a popup nonetheless
+                if (log_data["logs"] !== null) {
+                    $.each(log_data["logs"], function (i, object) {
+                        var outcomeid = object.id;
 
-                    }
-                    object.alertclass = alertclass;
-                    log_entries.push(object);
-                });
+                        if (outcomeid == 1) {
+                            //Its a success
+                            alertclass = 'text-success';
+                        }
+                        else if (outcomeid == 3) {
+                            alertclass = 'text-danger';
+                        }
+                        else if (outcomeid == 8) {
+                            alertclass = 'text-info';
+                        }
+                        else {
+                            alertclass = 'text-warning';
 
-                //console.log(log_entries);
-                console.log({'log': log_entries});
+                        }
+                        object.alertclass = alertclass;
+                        log_entries.push(object);
+                    });
+                }
+
+                console.log(log_entries);
+                //console.log({'log': log_entries});
                 templates.render('gradereport_transfer/transfer_log',
                     {'log': log_entries})
                     .then(function (html, js) {
@@ -62,10 +66,10 @@ define(['jquery', 'core/templates', 'core/ajax', 'core/config', 'core/yui', 'cor
             $('.get_transfer_logs').click(function (e) {
                 e.preventDefault();
                 // First make sure the grade structure is not empty
-                var userid = 196;
+                var userid = $(this).data('user-id');
+                console.log(userid);
                 var mappingid = 11;
                 //hide any previous YUI Dialogue
-                console.log("clicked now");
                 getLogs(userid, mappingid);
             });
         }

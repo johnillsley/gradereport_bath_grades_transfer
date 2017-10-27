@@ -23,9 +23,8 @@ $userid = required_param('userid', PARAM_INT);
 
 $localgradestransferlog = new \local_bath_grades_transfer_log();
 $logs = $localgradestransferlog::get_logs($userid, $mappingid, 20, true);
-if (!empty($logs)) {
-    echo json_encode($logs);
-}
+echo json_encode(array('logs' => $logs));
+
 
 
 
