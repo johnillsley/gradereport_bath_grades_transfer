@@ -23,10 +23,10 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-require_once '../../../config.php';
+require_once('../../../config.php');
 require_once($CFG->libdir . '/gradelib.php');
 require_once($CFG->dirroot . '/grade/lib.php');
-require_once($CFG->dirroot . '/grade/report/transfer/lib.php'); // Doesn't autoload
+require_once($CFG->dirroot . '/grade/report/transfer/lib.php'); // Doesn't autoload.
 require_once($CFG->dirroot . '/local/bath_grades_transfer/lib.php');
 
 // Grade report transfer table constants
@@ -63,6 +63,7 @@ $silast = optional_param('silast', '', PARAM_RAW);
 $currentgroup = 0;
 
 $title = get_string('pluginname', 'gradereport_transfer');
+global $PAGE, $DB;
 $PAGE->set_url('/grade/report/transfer/index.php'
     , array(
         'id' => $courseid,
@@ -100,6 +101,9 @@ $context = context_course::instance($course->id);
 require_capability('gradereport/transfer:view', $context);
 $access = false;
 $PAGE->requires->js_call_amd('gradereport_transfer/transfer_status', 'init', []);
+// AMD call to display log entries.
+$PAGE->requires->js_call_amd('gradereport_transfer/logentries', 'init', []);
+
 if (has_capability('moodle/grade:viewall', $context)) {
     // Ok - can view all course grades.
     $access = true;
