@@ -23,10 +23,10 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-require_once '../../../config.php';
+require_once('../../../config.php');
 require_once($CFG->libdir . '/gradelib.php');
 require_once($CFG->dirroot . '/grade/lib.php');
-require_once($CFG->dirroot . '/grade/report/transfer/lib.php'); // Doesn't autoload
+require_once($CFG->dirroot . '/grade/report/transfer/lib.php'); // Doesn't autoload.
 require_once($CFG->dirroot . '/local/bath_grades_transfer/lib.php');
 
 // Grade report transfer table constants
