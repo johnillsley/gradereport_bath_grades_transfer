@@ -143,7 +143,7 @@ class transfer_report extends \grade_report
 
         $this->sqlreadytotransfer = "
         AND (log.outcomeid NOT IN (" . TRANSFER_SUCCESS . "," . GRADE_QUEUED . ")
-         OR log.outcomeid IS NULL) -- already transferred or queued
+        OR log.outcomeid IS NULL) -- already transferred or queued
         AND gg.finalgrade IS NOT NULL
         AND CEIL(gg.finalgrade) = gg.finalgrade
         AND gg.rawgrademax=" . MAX_GRADE;
