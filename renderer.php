@@ -520,23 +520,6 @@ class gradereport_transfer_renderer extends plugin_renderer_base
 
         return $output;
     }
-    /*
-    private function is_already_in_queue($mappingid, $userid) {
-        global $DB;
-        // Get all adhoc queues.
-        $adhocqueues = $DB->get_records('task_adhoc', ['component' => 'gradereport_transfer'], '', 'id,customdata');
-        if (!empty($adhocqueues)) {
-            foreach ($adhocqueues as $customdata) {
-                $customdataobject = json_decode($customdata->customdata);
-                if ($customdataobject->mappingid == $mappingid && $customdataobject->user[0] == $userid) {
-                    // Already exists in the adhoc queue.
-                    return true;
-                }
-            }
-        }
-        return false;
-    }
-*/
     /**
      * Output of formatted grade
      * @param object $grade
