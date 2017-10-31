@@ -80,7 +80,8 @@ class gradereport_transfer_renderer extends plugin_renderer_base
                 get_string('scheduletransfer', 'gradereport_transfer') . '</a></strong>';
             $status .= get_string('triggermanually', 'gradereport_transfer');
             $context = context_course::instance($PAGE->course->id);
-            if (has_capability('gradereport/transfer:transfer', $context) && !$transferreport->selected->is_blind_marking_turned_on) {
+            if (has_capability('gradereport/transfer:transfer', $context) &&
+                !$transferreport->selected->is_blind_marking_turned_on) {
                 $status .= '<br/><a class="btn btn-default" href="' . $dotransfersurl . '">' .
                     get_string('transferall', 'gradereport_transfer') . '</a>';
             }
@@ -250,14 +251,16 @@ class gradereport_transfer_renderer extends plugin_renderer_base
                     // The grade has not been successfully transferred yet.
                     if ($grade->outcomeid == GRADE_QUEUED) {
                         $transferstatus = '<span class="label label-warning">' .
-                            $grade->transfer_outcome . '</span> ' . '<span class="label label-info">' . userdate($grade->timetransferred) . '</span>';
+                            $grade->transfer_outcome . '</span> ' . '<span class="label label-info">' .
+                            userdate($grade->timetransferred) . '</span>';
                         $transferallowed = false;
 
                     } else if ($grade->outcomeid > 1) {
                         // Transfer previously failed.
                         $transferstatus = '<span class="label label-danger">' .
                             get_string('transferfailed', 'gradereport_transfer') . '</span> ';
-                        $transferstatus .= userdate($grade->timetransferred) . " - <strong>" . $grade->transfer_outcome . "</strong>";
+                        $transferstatus .= userdate($grade->timetransferred) . " - <strong>" .
+                            $grade->transfer_outcome . "</strong>";
 
                     } else {
                         // Grade is ready to be transferred.
@@ -543,7 +546,8 @@ class gradereport_transfer_renderer extends plugin_renderer_base
 
         $actualgrade = (float)$grade->finalgrade;
         $maxgrade = (float)$grade->rawgrademax;
-        $gradedisplay = (round($actualgrade) == $actualgrade) ? $actualgrade : '<span class="max_grade_warning">' . $actualgrade . '</span>';
+        $gradedisplay = (round($actualgrade) == $actualgrade) ? $actualgrade : '<span class="max_grade_warning">' .
+            $actualgrade . '</span>';
         $maxdisplay = ($maxgrade == MAX_GRADE) ? $maxgrade : '<span class="max_grade_warning">' . $maxgrade . '</span>';
         return (!empty($grade->finalgrade)) ? $gradedisplay . ' / ' . $maxdisplay : '';
     }
