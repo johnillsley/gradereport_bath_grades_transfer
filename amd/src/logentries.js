@@ -1,4 +1,5 @@
-define(['jquery', 'core/templates', 'core/ajax', 'core/config', 'core/yui', 'core/notification'], function ($, templates, ajax, config, Y, notify) {
+define(['jquery', 'core/templates', 'core/ajax', 'core/config', 'core/yui'],
+    function ($, templates, ajax, config, Y) {
     var URL = config.wwwroot + '/grade/report/transfer/log_ajax.php';
     var alertclass = 'alert-info';
     var getLogs = function (userid, mappingid) {
@@ -22,8 +23,8 @@ define(['jquery', 'core/templates', 'core/ajax', 'core/config', 'core/yui', 'cor
             });
             if (log_data !== null) {
                 //if logs are empty , show a popup nonetheless
-                if (log_data["logs"] !== null) {
-                    $.each(log_data["logs"], function (i, object) {
+                if (log_data['logs'] !== null) {
+                    $.each(log_data['logs'], function (i, object) {
                         var outcomeid = object.id;
 
                         if (outcomeid == 1) {
@@ -49,11 +50,11 @@ define(['jquery', 'core/templates', 'core/ajax', 'core/config', 'core/yui', 'cor
                 //console.log({'log': log_entries});
                 templates.render('gradereport_transfer/transfer_log',
                     {'log': log_entries})
-                    .then(function (html, js) {
+                    .then(function (html) {
                         yuiDialogue.set('bodyContent', html);
                     }).fail(function (ex) {
                     yuiDialogue.set('bodyContent', '');
-                })
+                });
             }
             //Finally show the dialog box
             yuiDialogue.show();
