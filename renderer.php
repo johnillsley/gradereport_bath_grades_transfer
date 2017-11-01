@@ -96,7 +96,7 @@ class gradereport_transfer_renderer extends plugin_renderer_base
                 ' <strong>' . userdate($transferreport->selected->samisassessmentenddate) . '</strong>';
         }
 
-        // Build table.
+        // Build a table.
         $table = new html_table();
         $table->attributes['class'] = 'generaltable';
 
@@ -131,8 +131,7 @@ class gradereport_transfer_renderer extends plugin_renderer_base
         $table->data[] = array(
             get_string('moodleactivitytype', 'gradereport_transfer') .
             $OUTPUT->help_icon('moodle_activity_type', 'gradereport_transfer'),
-            ($transferreport->selected->moodle_activity_type == 'assign' ?
-                'Assignment' : $transferreport->selected->moodle_activity_type)
+            ($transferreport->selected->moodle_activity_type == 'assign' ? 'Assignment' : $transferreport->selected->moodle_activity_type)
         );
         $table->data[] = array(
             get_string('moodleactivityname', 'gradereport_transfer') .
