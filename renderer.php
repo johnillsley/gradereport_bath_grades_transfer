@@ -338,9 +338,12 @@ class gradereport_transfer_renderer extends plugin_renderer_base
                 $data[] = $timegraded;
                 $data[] = $gradetransferred;
                 $data[] = $transferstatus;
-                $data[] = '<a  data-mapping-id = '.$transferreport->id.' data-user-id = ' . $user->id .
-                    ' href = "#" class=" get_transfer_logs btn btn-info">
+                if (is_siteadmin()) {
+                    $data[] = '<a  data-mapping-id = ' . $transferreport->id . ' data-user-id = ' . $user->id .
+                        ' href = "#" class=" get_transfer_logs btn btn-info">
                             <i class="fa fa-history" aria-hidden="true"></i></a>';
+                }
+
                 $data[] = $transferbutton;
                 $table->add_data($data);
             }
