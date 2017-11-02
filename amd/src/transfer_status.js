@@ -121,7 +121,6 @@ define(['jquery', 'core/templates', 'core/ajax', 'core/config', 'core/yui'], fun
         var users = [];
         $.each(nodes, function (i, tr_node) {
             var node_user_value = $(tr_node).attr('data-moodle-user-id');
-            var already_in_queue_value = $(tr_node).attr('data-already-in-queue');
             users.push(node_user_value);
             /* if(already_in_queue_value == 1) {
              return true;

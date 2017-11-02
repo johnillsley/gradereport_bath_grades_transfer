@@ -23,9 +23,18 @@
 #grade_struct_summary .alert {
     font-size: 16px;
 }
-#report_bath_transfer_blind{
-    font-weight:bold;
+
+#report_bath_transfer_blind {
+    font-weight: bold;
 }
-#report_bath_transfer_blind i{
+
+#report_bath_transfer_blind i {
     vertical-align: middle;
+}
+
+#transferLogTable {
+    width: 100%;
+    height: 150px;
+    overflow-y:scroll;
+
 }
