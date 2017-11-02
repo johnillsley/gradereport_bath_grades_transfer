@@ -1,0 +1,22 @@
+{{^log}}No logs to show{{/log}}
+{{#log.length}}
+    <table class="generaltable">
+        <thead>
+        <tr>
+            <th>Outcome</th>
+            <th>Time attempted</th>
+        </tr>
+        </thead>
+        <tbody>
+        {{#log}}
+            <tr>
+                <!--Loopable-->
+                <td><span class="{{alertclass}}">{{outcome}} </span></td>
+                <td> {{timetransferred}} </td>
+            </tr>
+        {{/log}}
+
+        </tbody>
+
+    </table>
+{{/log.length}}

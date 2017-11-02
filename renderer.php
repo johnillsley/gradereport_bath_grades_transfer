@@ -96,7 +96,7 @@ class gradereport_transfer_renderer extends plugin_renderer_base
                 ' <strong>' . userdate($transferreport->selected->samisassessmentenddate) . '</strong>';
         }
 
-        // Build table.
+        // Build a table.
         $table = new html_table();
         $table->attributes['class'] = 'generaltable';
 
@@ -193,6 +193,9 @@ class gradereport_transfer_renderer extends plugin_renderer_base
 
         $tablecolumns[] = 'timetransferred';
         $tableheaders[] = get_string('transferstatus', 'gradereport_transfer');
+
+        $tablecolumns[] = 'transferhistory';
+        $tableheaders[] = 'Transfer History';
 
         $tablecolumns[] = 'transfernow';
         $tableheaders[] = get_string('dotransfernow', 'gradereport_transfer');
@@ -335,6 +338,12 @@ class gradereport_transfer_renderer extends plugin_renderer_base
                 $data[] = $timegraded;
                 $data[] = $gradetransferred;
                 $data[] = $transferstatus;
+                if (is_siteadmin()) {
+                    $data[] = '<a  data-mapping-id = ' . $transferreport->id . ' data-user-id = ' . $user->id .
+                        ' href = "#" class=" get_transfer_logs btn btn-info">
+                            <i class="fa fa-history" aria-hidden="true"></i></a>';
+                }
+
                 $data[] = $transferbutton;
                 $table->add_data($data);
             }
@@ -520,23 +529,6 @@ class gradereport_transfer_renderer extends plugin_renderer_base
 
         return $output;
     }
-    /*
-    private function is_already_in_queue($mappingid, $userid) {
-        global $DB;
-        // Get all adhoc queues.
-        $adhocqueues = $DB->get_records('task_adhoc', ['component' => 'gradereport_transfer'], '', 'id,customdata');
-        if (!empty($adhocqueues)) {
-            foreach ($adhocqueues as $customdata) {
-                $customdataobject = json_decode($customdata->customdata);
-                if ($customdataobject->mappingid == $mappingid && $customdataobject->user[0] == $userid) {
-                    // Already exists in the adhoc queue.
-                    return true;
-                }
-            }
-        }
-        return false;
-    }
-*/
     /**
      * Output of formatted grade
      * @param object $grade
