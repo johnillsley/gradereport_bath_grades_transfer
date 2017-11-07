@@ -1,5 +1,5 @@
-define(['jquery', 'core/templates', 'core/ajax', 'core/config', 'core/yui'],
-    function ($, templates, ajax, config, Y) {
+define(['jquery', 'core/templates', 'core/ajax', 'core/config'],
+    function ($, templates, ajax, config) {
     var URL = config.wwwroot + '/grade/report/transfer/log_ajax.php';
     var alertclass = 'alert-info';
     var getLogs = function (userid, mappingid) {
