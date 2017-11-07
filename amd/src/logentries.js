@@ -45,9 +45,6 @@ define(['jquery', 'core/templates', 'core/ajax', 'core/config', 'core/yui'],
                         log_entries.push(object);
                     });
                 }
-
-                console.log(log_entries);
-                //console.log({'log': log_entries});
                 templates.render('gradereport_transfer/transfer_log',
                     {'log': log_entries})
                     .then(function (html) {
