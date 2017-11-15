@@ -338,6 +338,7 @@ class gradereport_transfer_renderer extends plugin_renderer_base
                 $data[] = $checkbox;
                 $data[] = $OUTPUT->user_picture($user, array('size' => 35, 'courseid' => $PAGE->course->id));
                 $data[] = $profilelink;
+                $data[] = $this->display_grade($grade);
                 $data[] = $timegraded;
                 $data[] = $gradetransferred;
                 $data[] = $transferstatus;
