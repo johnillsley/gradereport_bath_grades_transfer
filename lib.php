@@ -270,6 +270,7 @@ class transfer_report extends \grade_report
             // Condition for blind marking.
             if (isset($moodlemodule->blindmarking)) {
                 $mapping->is_blind_marking_turned_on = $moodlemodule->blindmarking;
+                $mapping->revealidentities = $moodlemodule->revealidentities;
             }
 
             // Drop down menu options for mapped moodle activities.
