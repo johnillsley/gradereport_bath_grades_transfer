@@ -88,12 +88,12 @@ class gradereport_transfer_renderer extends plugin_renderer_base
 
         } else if ($transferreport->selected->samisassessmentenddate > time()) {
             // Transfer will occur in the future.
-            $status = get_string('transferscheduled', 'gradereport_transfer') .
-                ' <strong>' . userdate($transferreport->selected->samisassessmentenddate) . '</strong>';
+            $status = "<span class='label label-info'>".get_string('transferscheduled', 'gradereport_transfer') .
+                ' <strong>' . userdate($transferreport->selected->samisassessmentenddate) . '</strong></span>';
         } else {
             // Transfer has already occurred.
-            $status = get_string('transfercompleted', 'gradereport_transfer') .
-                ' <strong>' . userdate($transferreport->selected->samisassessmentenddate) . '</strong>';
+            $status = "<span class='label label-success'>".get_string('transfercompleted', 'gradereport_transfer') .
+                ' <strong>' . userdate($transferreport->selected->samisassessmentenddate) . '</strong></span>';
         }
 
         // Build a table.
@@ -237,6 +237,10 @@ class gradereport_transfer_renderer extends plugin_renderer_base
 
         $gradelist = $transferreport->user_list($table);
         $table->pagesize($transferreport->perpage, $transferreport->matchcount);
+        $singlegradeurl = $CFG->wwwroot .'/mod/'.
+            $transferreport->selected->moodle_activity_type .
+            '/view.php?id=' . $transferreport->selected->coursemoduleid .
+            '&action=grader';
 
         if ($gradelist->valid()) {
 
@@ -334,7 +338,8 @@ class gradereport_transfer_renderer extends plugin_renderer_base
                 $data[] = $checkbox;
                 $data[] = $OUTPUT->user_picture($user, array('size' => 35, 'courseid' => $PAGE->course->id));
                 $data[] = $profilelink;
-                $data[] = $this->display_grade($grade);
+                $data[] = $this->display_grade($grade) . " <a href='".$singlegradeurl."&userid=".$user->id."'
+ class='btn btn-success'><i class=\"fa fa-pencil\"></i></a>";
                 $data[] = $timegraded;
                 $data[] = $gradetransferred;
                 $data[] = $transferstatus;
