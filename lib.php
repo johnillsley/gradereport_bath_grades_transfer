@@ -147,7 +147,7 @@ class transfer_report extends \grade_report
         $this->sqlparams['contextid'] = $context->id;
 
         $this->sqlreadytotransfer = "
-        AND (log.outcomeid NOT IN (" . TRANSFER_SUCCESS . "," . GRADE_QUEUED . ")
+        AND (log.outcomeid NOT IN (" . TRANSFER_SUCCESS . "," . GRADE_QUEUED . "," .GRADE_ALREADY_EXISTS. ")
         OR log.outcomeid IS NULL) -- already transferred or queued
         AND gg.finalgrade IS NOT NULL
         AND CEIL(gg.finalgrade) = gg.finalgrade
