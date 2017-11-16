@@ -138,7 +138,6 @@ if (!empty($outcomeoutput)) {
     echo $outcomeoutput;
 }
 if ($confirmtransfer == 0 && !empty($dotransfer)) {
-    var_dump($transferreport->selected);
     if (!$transferreport->selected->is_blind_marking_turned_on || ($transferreport->selected->is_blind_marking_turned_on
             && $transferreport->selected->revealidentities)) {
         $transferlist = $transferreport->get_transfer_list($dotransfer);
