@@ -80,22 +80,23 @@ class gradereport_transfer_renderer extends plugin_renderer_base
                 get_string('scheduletransfer', 'gradereport_transfer') . '</a></strong>';
             $status .= get_string('triggermanually', 'gradereport_transfer');
             $context = context_course::instance($PAGE->course->id);
-            if (has_capability('gradereport/transfer:transfer', $context) && !$transferreport->selected->is_blind_marking_turned_on) {
+            if (has_capability('gradereport/transfer:transfer', $context) &&
+                !$transferreport->selected->is_blind_marking_turned_on) {
                 $status .= '<br/><a class="btn btn-default" href="' . $dotransfersurl . '">' .
                     get_string('transferall', 'gradereport_transfer') . '</a>';
             }
 
         } else if ($transferreport->selected->samisassessmentenddate > time()) {
             // Transfer will occur in the future.
-            $status = get_string('transferscheduled', 'gradereport_transfer') .
-                ' <strong>' . userdate($transferreport->selected->samisassessmentenddate) . '</strong>';
+            $status = "<span class='label label-info'>".get_string('transferscheduled', 'gradereport_transfer') .
+                ' <strong>' . userdate($transferreport->selected->samisassessmentenddate) . '</strong></span>';
         } else {
             // Transfer has already occurred.
-            $status = get_string('transfercompleted', 'gradereport_transfer') .
-                ' <strong>' . userdate($transferreport->selected->samisassessmentenddate) . '</strong>';
+            $status = "<span class='label label-success'>".get_string('transfercompleted', 'gradereport_transfer') .
+                ' <strong>' . userdate($transferreport->selected->samisassessmentenddate) . '</strong></span>';
         }
 
-        // Build table.
+        // Build a table.
         $table = new html_table();
         $table->attributes['class'] = 'generaltable';
 
@@ -193,6 +194,9 @@ class gradereport_transfer_renderer extends plugin_renderer_base
         $tablecolumns[] = 'timetransferred';
         $tableheaders[] = get_string('transferstatus', 'gradereport_transfer');
 
+        $tablecolumns[] = 'transferhistory';
+        $tableheaders[] = 'Transfer History';
+
         $tablecolumns[] = 'transfernow';
         $tableheaders[] = get_string('dotransfernow', 'gradereport_transfer');
 
@@ -233,6 +237,10 @@ class gradereport_transfer_renderer extends plugin_renderer_base
 
         $gradelist = $transferreport->user_list($table);
         $table->pagesize($transferreport->perpage, $transferreport->matchcount);
+        $singlegradeurl = $CFG->wwwroot .'/mod/'.
+            $transferreport->selected->moodle_activity_type .
+            '/view.php?id=' . $transferreport->selected->coursemoduleid .
+            '&action=grader';
 
         if ($gradelist->valid()) {
 
@@ -248,16 +256,18 @@ class gradereport_transfer_renderer extends plugin_renderer_base
                 $transferallowed = true;
                 if ($grade->outcomeid != 1) {
                     // The grade has not been successfully transferred yet.
-                    if ($grade->outcomeid == GRADE_QUEUED) {
+                    if ($grade->outcomeid == GRADE_QUEUED || $grade->outcomeid == GRADE_ALREADY_EXISTS ) {
                         $transferstatus = '<span class="label label-warning">' .
-                            $grade->transfer_outcome . '</span> ' . '<span class="label label-info">' . userdate($grade->timetransferred) . '</span>';
+                            $grade->transfer_outcome . '</span> ' . '<span class="label label-info">' .
+                            userdate($grade->timetransferred) . '</span>';
                         $transferallowed = false;
 
                     } else if ($grade->outcomeid > 1) {
                         // Transfer previously failed.
                         $transferstatus = '<span class="label label-danger">' .
                             get_string('transferfailed', 'gradereport_transfer') . '</span> ';
-                        $transferstatus .= userdate($grade->timetransferred) . " - <strong>" . $grade->transfer_outcome . "</strong>";
+                        $transferstatus .= userdate($grade->timetransferred) . " - <strong>" .
+                            $grade->transfer_outcome . "</strong>";
 
                     } else {
                         // Grade is ready to be transferred.
@@ -332,6 +342,12 @@ class gradereport_transfer_renderer extends plugin_renderer_base
                 $data[] = $timegraded;
                 $data[] = $gradetransferred;
                 $data[] = $transferstatus;
+                if (is_siteadmin()) {
+                    $data[] = '<a  data-mapping-id = ' . $transferreport->id . ' data-user-id = ' . $user->id .
+                        ' href = "#" class=" get_transfer_logs btn btn-info">
+                            <i class="fa fa-history" aria-hidden="true"></i></a>';
+                }
+
                 $data[] = $transferbutton;
                 $table->add_data($data);
             }
@@ -517,23 +533,6 @@ class gradereport_transfer_renderer extends plugin_renderer_base
 
         return $output;
     }
-    /*
-    private function is_already_in_queue($mappingid, $userid) {
-        global $DB;
-        // Get all adhoc queues.
-        $adhocqueues = $DB->get_records('task_adhoc', ['component' => 'gradereport_transfer'], '', 'id,customdata');
-        if (!empty($adhocqueues)) {
-            foreach ($adhocqueues as $customdata) {
-                $customdataobject = json_decode($customdata->customdata);
-                if ($customdataobject->mappingid == $mappingid && $customdataobject->user[0] == $userid) {
-                    // Already exists in the adhoc queue.
-                    return true;
-                }
-            }
-        }
-        return false;
-    }
-*/
     /**
      * Output of formatted grade
      * @param object $grade
@@ -543,7 +542,8 @@ class gradereport_transfer_renderer extends plugin_renderer_base
 
         $actualgrade = (float)$grade->finalgrade;
         $maxgrade = (float)$grade->rawgrademax;
-        $gradedisplay = (round($actualgrade) == $actualgrade) ? $actualgrade : '<span class="max_grade_warning">' . $actualgrade . '</span>';
+        $gradedisplay = (round($actualgrade) == $actualgrade) ? $actualgrade : '<span class="max_grade_warning">' .
+            $actualgrade . '</span>';
         $maxdisplay = ($maxgrade == MAX_GRADE) ? $maxgrade : '<span class="max_grade_warning">' . $maxgrade . '</span>';
         return (!empty($grade->finalgrade)) ? $gradedisplay . ' / ' . $maxdisplay : '';
     }

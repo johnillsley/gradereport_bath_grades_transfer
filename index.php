@@ -23,10 +23,10 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-require_once '../../../config.php';
+require_once('../../../config.php');
 require_once($CFG->libdir . '/gradelib.php');
 require_once($CFG->dirroot . '/grade/lib.php');
-require_once($CFG->dirroot . '/grade/report/transfer/lib.php'); // Doesn't autoload
+require_once($CFG->dirroot . '/grade/report/transfer/lib.php'); // Doesn't autoload.
 require_once($CFG->dirroot . '/local/bath_grades_transfer/lib.php');
 
 // Grade report transfer table constants
@@ -35,18 +35,6 @@ define('USER_LARGE_CLASS', 200);  // Above this is considered large.
 define('DEFAULT_PAGE_SIZE', 20);
 define('SHOW_ALL_PAGE_SIZE', 5000);
 define('MODE_USERDETAILS', 1);
-
-// Grade report transfer outcome constants
-// TODO - Probably need to remove the following constants as these are dealt with in the local plugin
-/*
-define('TRANSFER_SUCCESS', 1);
-define('TRANSFER_NO_GRADE', 2);
-define('TRANSFER_ERROR', 3);
-define('GRADE_ALREADY_EXISTS', 4);
-define('NOT_IN_MOODLE_COURSE', 5);
-define('NOT_IN_SITS_STRUCTURE', 6);
-define('GRADE_NOT_OUT_OF_100', 7);
-*/
 
 $courseid = required_param('id', PARAM_INT);
 $mappingid = optional_param('mappingid', 0, PARAM_INT);
@@ -63,6 +51,7 @@ $silast = optional_param('silast', '', PARAM_RAW);
 $currentgroup = 0;
 
 $title = get_string('pluginname', 'gradereport_transfer');
+global $PAGE, $DB;
 $PAGE->set_url('/grade/report/transfer/index.php'
     , array(
         'id' => $courseid,
@@ -100,6 +89,9 @@ $context = context_course::instance($course->id);
 require_capability('gradereport/transfer:view', $context);
 $access = false;
 $PAGE->requires->js_call_amd('gradereport_transfer/transfer_status', 'init', []);
+// AMD call to display log entries.
+$PAGE->requires->js_call_amd('gradereport_transfer/logentries', 'init', []);
+
 if (has_capability('moodle/grade:viewall', $context)) {
     // Ok - can view all course grades.
     $access = true;
@@ -146,7 +138,8 @@ if (!empty($outcomeoutput)) {
     echo $outcomeoutput;
 }
 if ($confirmtransfer == 0 && !empty($dotransfer)) {
-    if (!$transferreport->selected->is_blind_marking_turned_on) {
+    if (!$transferreport->selected->is_blind_marking_turned_on || ($transferreport->selected->is_blind_marking_turned_on
+            && $transferreport->selected->revealidentities)) {
         $transferlist = $transferreport->get_transfer_list($dotransfer);
         echo $output->confirm_transfers($transferreport, $transferlist, $dotransfer);
     } else {
@@ -193,7 +186,8 @@ if (empty($dotransfer)) {
             $transferreport->silast = $silast;
             $transferreport->transferstatus = $transferstatus;
 
-            if (!$transferreport->selected->is_blind_marking_turned_on) {
+            if (!$transferreport->selected->is_blind_marking_turned_on ||  ($transferreport->selected->is_blind_marking_turned_on
+                    && $transferreport->selected->revealidentities)) {
                 $module = array('name' => 'core_user', 'fullpath' => '/user/module.js');
                 $PAGE->requires->js_init_call('M.core_user.init_participation', null, false, $module);
 

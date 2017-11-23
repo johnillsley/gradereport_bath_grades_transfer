@@ -105,7 +105,11 @@ class transfer_report extends \grade_report
         JOIN {sits_mappings_enrols} me ON me.map_id = sm.id
         JOIN {user_enrolments} ue ON ue.id = me.u_enrol_id -- PROBLEM WITH user_enrolments BEING REMOVED!!!
         JOIN {user} u ON u.id = ue.userid
-
+        JOIN {role_assignments} ra 
+            ON ra.userid = u.id
+            AND contextid = :contextid
+            AND roleid = 5 /* student role */
+            
         /***** join moodle activity information relating to mapping including current grade *****/
         JOIN {course_modules} cm ON cm.id = gm.coursemodule
         JOIN {modules} mo ON mo.id = cm.module
@@ -140,9 +144,11 @@ class transfer_report extends \grade_report
         WHERE gm.id = :id
         ";
         $this->sqlparams['id'] = $this->id;
+        $this->sqlparams['contextid'] = $context->id;
 
         $this->sqlreadytotransfer = "
-        AND (log.outcomeid NOT IN (" . TRANSFER_SUCCESS . "," . GRADE_QUEUED . ") OR log.outcomeid IS NULL) -- already transferred or queued
+        AND (log.outcomeid NOT IN (" . TRANSFER_SUCCESS . "," . GRADE_QUEUED . "," .GRADE_ALREADY_EXISTS. ")
+        OR log.outcomeid IS NULL) -- already transferred or queued
         AND gg.finalgrade IS NOT NULL
         AND CEIL(gg.finalgrade) = gg.finalgrade
         AND gg.rawgrademax=" . MAX_GRADE;
@@ -264,6 +270,7 @@ class transfer_report extends \grade_report
             // Condition for blind marking.
             if (isset($moodlemodule->blindmarking)) {
                 $mapping->is_blind_marking_turned_on = $moodlemodule->blindmarking;
+                $mapping->revealidentities = $moodlemodule->revealidentities;
             }
 
             // Drop down menu options for mapped moodle activities.
