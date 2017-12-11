@@ -19,6 +19,7 @@
  *
  * @package    grade_report_bath_transfer
  * @author     John Illsley <j.s.illsley@bath.ac.uk>
+ * @author     Hittesh Ahuja <h.ahuja@bath.ac.uk>
  * @copyright  2017 University of Bath
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
