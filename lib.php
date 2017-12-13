@@ -105,11 +105,10 @@ class transfer_report extends \grade_report
         JOIN {sits_mappings_enrols} me ON me.map_id = sm.id
         JOIN {user_enrolments} ue ON ue.id = me.u_enrol_id -- PROBLEM WITH user_enrolments BEING REMOVED!!!
         JOIN {user} u ON u.id = ue.userid
-        JOIN {role_assignments} ra 
+        JOIN {role_assignments} ra
             ON ra.userid = u.id
             AND contextid = :contextid
             AND roleid = 5 /* student role */
-            
         /***** join moodle activity information relating to mapping including current grade *****/
         JOIN {course_modules} cm ON cm.id = gm.coursemodule
         JOIN {modules} mo ON mo.id = cm.module
