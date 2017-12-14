@@ -524,8 +524,8 @@ class gradereport_transfer_renderer extends plugin_renderer_base
             $output .= '</form>';
         } else {
             $output .= "<div class=\"alert alert-warning\" role=\"alert\">
-            <i style=\"vertical-align: middle;\" class=\"fa fa-exclamation-triangle fa-3x\" aria-hidden=\"true\"></i>
-            <span style='padding: 3px;font-size: 16px;'>No grades to transfer</span></div>";
+            <i style=\"vertical-align: middle;\" class=\"fa fa-exclamation-triangle\" aria-hidden=\"true\"></i>
+            <span style='padding: 3px;'>No grades have been identified that need to be transferred at the moment. Please try again later</span></div>";
             $output .= ' <a id = "cancel_grade_transfer" href="javascript:history.back()" class="btn btn-danger">' .
                 get_string('canceltransfer', 'gradereport_transfer') . '</a>';
         }
