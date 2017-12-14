@@ -146,7 +146,7 @@ class transfer_report extends \grade_report
         $this->sqlparams['contextid'] = $context->id;
 
         $this->sqlreadytotransfer = "
-        AND (log.outcomeid NOT IN (" . TRANSFER_SUCCESS . "," . GRADE_QUEUED . "," .GRADE_ALREADY_EXISTS. ")
+        AND (log.outcomeid NOT IN (" . TRANSFER_SUCCESS . "," . GRADE_QUEUED . "," . GRADE_ALREADY_EXISTS . ")
         OR log.outcomeid IS NULL) -- already transferred or queued
         AND gg.finalgrade IS NOT NULL
         AND CEIL(gg.finalgrade) = gg.finalgrade
@@ -267,11 +267,11 @@ class transfer_report extends \grade_report
             $moodlemodule = $DB->get_record($mapping->moodle_activity_type, array('id' => $mapping->instance));
             $mapping->moodle_activity_name = $moodlemodule->name;
             // Condition for blind marking.
+            $mapping->is_blind_marking_turned_on = 0;
             if (isset($moodlemodule->blindmarking)) {
                 $mapping->is_blind_marking_turned_on = $moodlemodule->blindmarking;
                 $mapping->revealidentities = $moodlemodule->revealidentities;
             }
-
             // Drop down menu options for mapped moodle activities.
 
             if ($mapping->id == $this->id) {
