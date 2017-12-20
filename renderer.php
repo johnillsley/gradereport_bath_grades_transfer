@@ -389,7 +389,7 @@ class gradereport_transfer_renderer extends plugin_renderer_base
     /**
      * Output of search form for finding users by name in the grade transfer table
      * @param transfer report object $transferreport
-     * @param moodle_url object $baseurl - additional form parameters that are needed to return to the correct mapping
+     * @param moodle_url $baseurl - additional form parameters that are needed to return to the correct mapping
      * @return string
      */
     public function table_name_search_form($transferreport, $baseurl) {
