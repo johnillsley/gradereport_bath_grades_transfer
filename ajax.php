@@ -14,6 +14,9 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 define('AJAX_SCRIPT', true);
+error_reporting(E_ALL);
+ini_set('display_errors', 'On');
+
 require_once(dirname(__FILE__) . '/../../../config.php');
 require_once($CFG->dirroot . '/grade/report/transfer/lib.php');
 require_once($CFG->libdir . '/gradelib.php');
@@ -41,8 +44,10 @@ if ($action == 'grade_struct_exists') {
     if (isset($mappingid)) {
         $assessmentmapping = \local_bath_grades_transfer_assessment_mapping::get($mappingid, true);
         if (isset($assessmentmapping->lookup) && $objlookup = $assessmentmapping->lookup) {
-            $lookup = \local_bath_grades_transfer_assessment_lookup::get($objlookup->id);
-            $gradestructure = \local_bath_grades_transfer_assessment_grades::get_grade_strucuture_samis($lookup);
+            $lookup = \local_bath_grades_transfer_assessment_lookup::get_by_id($objlookup->id);
+            $assessmentgrades = new local_bath_grades_transfer_assessment_grades();
+            $gradestructure = $assessmentgrades->get_grade_strucuture_samis($lookup);
+            //$gradestructure = \local_bath_grades_transfer_assessment_grades::get_grade_strucuture_samis($objlookup);
             if (empty($gradestructure)) {
                 $transferstatus = new \gradereport_transfer\output\transfer_status
                 (null, 'grade_struct_empty', null, "GRADE STRUCTURE IS EMPTY");
