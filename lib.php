@@ -105,10 +105,11 @@ class transfer_report extends \grade_report
         JOIN {sits_mappings_enrols} me ON me.map_id = sm.id
         JOIN {user_enrolments} ue ON ue.id = me.u_enrol_id -- PROBLEM WITH user_enrolments BEING REMOVED!!!
         JOIN {user} u ON u.id = ue.userid
-        JOIN {role_assignments} ra
+        JOIN {role_assignments} ra 
             ON ra.userid = u.id
             AND contextid = :contextid
             AND roleid = 5 /* student role */
+            
         /***** join moodle activity information relating to mapping including current grade *****/
         JOIN {course_modules} cm ON cm.id = gm.coursemodule
         JOIN {modules} mo ON mo.id = cm.module
@@ -267,11 +268,11 @@ class transfer_report extends \grade_report
             $moodlemodule = $DB->get_record($mapping->moodle_activity_type, array('id' => $mapping->instance));
             $mapping->moodle_activity_name = $moodlemodule->name;
             // Condition for blind marking.
-            $mapping->is_blind_marking_turned_on = 0;
             if (isset($moodlemodule->blindmarking)) {
                 $mapping->is_blind_marking_turned_on = $moodlemodule->blindmarking;
                 $mapping->revealidentities = $moodlemodule->revealidentities;
             }
+
             // Drop down menu options for mapped moodle activities.
 
             if ($mapping->id == $this->id) {
@@ -371,7 +372,8 @@ class transfer_report extends \grade_report
     public function do_transfers($transferlist = array()) {
         // Require local plugin class.
         $gradetransfers = new \local_bath_grades_transfer();
-        $responses = $gradetransfers->transfer_mapping2($this->id, $transferlist);
+        $assessmentgrades = new \local_bath_grades_transfer_assessment_grades();
+        $responses = $gradetransfers->transfer_mapping2($this->id, $transferlist, $assessmentgrades);
         return $responses;
     }
 
