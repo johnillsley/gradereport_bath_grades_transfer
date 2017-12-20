@@ -235,10 +235,13 @@ class gradereport_transfer_renderer extends plugin_renderer_base
         $table->use_pages = true;
         $gradelist = $transferreport->user_list($table);
         $table->pagesize($transferreport->perpage, $transferreport->matchcount);
-        $singlegradeurl = $CFG->wwwroot . '/mod/' .
-            $transferreport->selected->moodle_activity_type .
-            '/view.php?id=' . $transferreport->selected->coursemoduleid .
-            '&action=grader';
+        if ($transferreport->selected->moodle_activity_type == 'assign') {
+            $singlegradeurl = $CFG->wwwroot . '/mod/' .
+                $transferreport->selected->moodle_activity_type .
+                '/view.php?id=' . $transferreport->selected->coursemoduleid .
+                '&action=grader';
+        }
+
 
         if ($gradelist->valid()) {
 
@@ -336,8 +339,13 @@ class gradereport_transfer_renderer extends plugin_renderer_base
                 $data[] = $checkbox;
                 $data[] = $OUTPUT->user_picture($user, array('size' => 35, 'courseid' => $PAGE->course->id));
                 $data[] = $profilelink;
-                $data[] = $this->display_grade($grade) . " <a href='".$singlegradeurl."&userid=".$user->id."'
+                if ($transferreport->selected->moodle_activity_type == 'assign') {
+                    $data[] = $this->display_grade($grade) . " <a href='" . $singlegradeurl . "&userid=" . $user->id . "'
 class='btn btn-success'><i class=\"fa fa-pencil\"></i></a>";
+                } else {
+                    $data[] = $this->display_grade($grade);
+                }
+
                 $data[] = $timegraded;
                 $data[] = $gradetransferred;
                 $data[] = $transferstatus;
