@@ -233,7 +233,6 @@ class gradereport_transfer_renderer extends plugin_renderer_base
 
         $table->pagesize = $transferreport->perpage;
         $table->use_pages = true;
-
         $gradelist = $transferreport->user_list($table);
         $table->pagesize($transferreport->perpage, $transferreport->matchcount);
         $singlegradeurl = $CFG->wwwroot . '/mod/' .
