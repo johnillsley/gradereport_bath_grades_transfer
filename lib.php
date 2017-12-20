@@ -516,7 +516,6 @@ class transfer_report extends \grade_report
             'firstname' => 'First Name',
             'lastname' => 'Last Name',
             'finalgrade' => 'Grade',
-            'rawgrademax' => 'Max Grade',
             'timegraded' => 'Last Graded',
             'itemname' => 'Moodle Activity',
             'itemmodule' => 'Activity Type',
@@ -533,6 +532,9 @@ class transfer_report extends \grade_report
         foreach ($gradelist as $grade) {
             foreach ($fields as $key => $field) {
                 $data = $grade->$key;
+                if ($key == 'rawgrademax') {
+                    continue;
+                }
                 if (($key == 'timegraded' || $key == 'timetransferred') && !is_null($data)) {
                     $data = userdate($data);
                 }
