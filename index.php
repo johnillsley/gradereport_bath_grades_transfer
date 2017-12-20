@@ -49,7 +49,7 @@ $search = optional_param('search', '', PARAM_RAW);
 $sifirst = optional_param('sifirst', '', PARAM_RAW);
 $silast = optional_param('silast', '', PARAM_RAW);
 $currentgroup = 0;
-
+$action = optional_param('action', '', PARAM_RAW);
 $title = get_string('pluginname', 'gradereport_transfer');
 global $PAGE, $DB;
 $PAGE->set_url('/grade/report/transfer/index.php'
@@ -104,6 +104,10 @@ if (!$access) {
 $gpr = new grade_plugin_return(array('type' => 'report', 'plugin' => 'transfer', 'courseid' => $course->id));
 
 $transferreport = new \gradereport_transfer\transfer_report($course->id, $gpr, $context, $mappingid);
+if ($action == 'download_log') {
+    $transferreport->download_log($mappingid);
+    die;
+}
 $transferreport->get_mapping_options($course->id, $year);
 if (!empty($transferreport->selected->expired)) {
     $output->valid_mapping = false; // Mapping has expired so output needs to know.

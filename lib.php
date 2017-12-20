@@ -29,6 +29,7 @@ require_once($CFG->dirroot . '/grade/report/lib.php');
 require_once($CFG->dirroot . '/grade/report/transfer/classes/grade_transfer.php');
 require_once($CFG->dirroot . '/local/bath_grades_transfer/lib.php');
 require_once($CFG->dirroot . '/local/bath_grades_transfer/classes/assessment_grades.php');
+require_once($CFG->libdir . '/csvlib.class.php');
 
 /**
  * Class providing core functionality for the grade transfer report
@@ -88,6 +89,7 @@ class transfer_report extends \grade_report
         parent::__construct($courseid, $gpr, $context);
 
         $this->id = $mappingid;
+        $this->courseid = $courseid;
         $this->sqlfrom = "
         /***** get the grade transfer mapping *****/
         FROM {local_bath_grades_mapping} gm
@@ -105,11 +107,10 @@ class transfer_report extends \grade_report
         JOIN {sits_mappings_enrols} me ON me.map_id = sm.id
         JOIN {user_enrolments} ue ON ue.id = me.u_enrol_id -- PROBLEM WITH user_enrolments BEING REMOVED!!!
         JOIN {user} u ON u.id = ue.userid
-        JOIN {role_assignments} ra 
+        JOIN {role_assignments} ra
             ON ra.userid = u.id
             AND contextid = :contextid
             AND roleid = 5 /* student role */
-            
         /***** join moodle activity information relating to mapping including current grade *****/
         JOIN {course_modules} cm ON cm.id = gm.coursemodule
         JOIN {modules} mo ON mo.id = cm.module
@@ -399,17 +400,19 @@ class transfer_report extends \grade_report
      * @param object $table - required for paging information
      * @return \moodle_recordset $rs
      */
-    public function user_list($table) {
+    public function user_list($table = null) {
         global $DB;
 
-        $limitfrom = $table->get_page_start();
-        $limitnum = $table->get_page_size();
+        $limitfrom = (isset($table) ? $table->get_page_start() : '0');
+        $limitnum = (isset($table) ? $table->get_page_size() : '0');
 
         $ordersql = "";
-        if ($orderby = $table->get_sql_sort()) {
-            $ordersql .= ' ORDER BY ' . $orderby . ' ';
-        } else {
-            $ordersql .= ' ORDER BY lastname, firstname';
+        if (isset($table)) {
+            if ($orderby = $table->get_sql_sort()) {
+                $ordersql .= ' ORDER BY ' . $orderby . ' ';
+            } else {
+                $ordersql .= ' ORDER BY lastname, firstname';
+            }
         }
 
         $this->totalcount = $DB->count_records_sql("SELECT COUNT(ue.userid) " . $this->sqlfrom, $this->sqlparams);
@@ -500,5 +503,47 @@ class transfer_report extends \grade_report
         );
 
         return $rs;
+    }
+
+    /**
+     * @param $mappingid
+     */
+    public function download_log($mappingid) {
+        $this->get_mapping_options($this->courseid);
+        $filename = "transfer-log-" . $this->selected->samisassessmentid;
+        $logdata = array();
+        $fields = array(
+            'firstname' => 'First Name',
+            'lastname' => 'Last Name',
+            'finalgrade' => 'Grade',
+            'rawgrademax' => 'Max Grade',
+            'timegraded' => 'Last Graded',
+            'itemname' => 'Moodle Activity',
+            'itemmodule' => 'Activity Type',
+            'timetransferred' => 'Time Transferred',
+            'gradetransferred' => 'Transferred Grade',
+            'transfer_outcome' => 'Transfer Status'
+        );
+        $this->id = $mappingid;
+
+        $csvexport = new \csv_export_writer();
+        $csvexport->set_filename($filename);
+        $csvexport->add_data($fields);
+        $gradelist = $this->user_list();
+        foreach ($gradelist as $grade) {
+            foreach ($fields as $key => $field) {
+                $data = $grade->$key;
+                if (($key == 'timegraded' || $key == 'timetransferred') && !is_null($data)) {
+                    $data = userdate($data);
+                }
+                $logdata[$key] = $data;
+            }
+            $csvexport->add_data($logdata);
+        }
+        $csvexport->add_data($logdata);
+        $csvexport->download_file();
+        die;
+        // Download all log for the current mapping ID.
+
     }
 }

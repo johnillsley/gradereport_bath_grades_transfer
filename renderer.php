@@ -155,6 +155,9 @@ class gradereport_transfer_renderer extends plugin_renderer_base
             $OUTPUT->help_icon('transfer_mapping_details', 'gradereport_transfer'),
             $useraction . fullname($usermodifier) . " on " . userdate($transferreport->selected->timemodified)
         );
+        $table->data[] = array('Log Export', '<a href="index.php?action=download_log&id='
+            . $PAGE->course->id . '&mappingid=' . $transferreport->id . '">
+            <i class=" text-success fa fa-file-excel-o"></i> Download CSV</a>');
 
         return html_writer::table($table);
     }
