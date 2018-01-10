@@ -230,6 +230,7 @@ class transfer_report extends \grade_report
             , gl.mabseq
             ,gl.astcode
             ,gl.mabperc
+            ,gl.mabpnam
             , gl.periodslotcode
             , gl.expired
             , cm.course
