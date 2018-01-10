@@ -129,6 +129,9 @@ class gradereport_transfer_renderer extends plugin_renderer_base
             get_string('mabperc', 'gradereport_transfer'),
             $transferreport->selected->mabperc
         );
+        $table->data[] = array(get_string('samis_anon', 'gradereport_transfer') .
+            $OUTPUT->help_icon('samis_anon', 'gradereport_transfer'),
+            $transferreport->selected->mabpnam);
         $table->data[] = array(
             get_string('moodleactivitytype', 'gradereport_transfer') .
             $OUTPUT->help_icon('moodle_activity_type', 'gradereport_transfer'),
