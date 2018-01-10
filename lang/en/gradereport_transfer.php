@@ -105,6 +105,10 @@ $string['transfer_mapping_details_help'] = 'Transfer Mapping details set on the 
 $string['transfer_mapping_details'] = 'Transfer Mapping details';
 $string['transfer_status_help'] = 'Status of your transfer';
 $string['transfer_status'] = 'Transfer Status';
+$string['samis_anon'] = 'Print name in SAMIS';
+$string['samis_anon_help'] = 'Value of MABPNAM field in MAB table .<br/>
+  <strong> N </strong> = Anonymous in SAMIS <br/>
+  <strong> Y </strong> = Not anonymous in SAMIS';
 // EVENTS.
 $string['gradereport_transfer_queue'] = 'Grade Transfer Queue';
 $string['processqueuedgrades'] = 'Process Queued Grades to Transfer';
