@@ -94,7 +94,7 @@ class gradereport_transfer_renderer extends plugin_renderer_base
         } else {
             // Transfer has already occurred.
             $status = "<span class='label label-success'>" . get_string('transfercompleted', 'gradereport_transfer') .
-                ' <strong>' . userdate($transferreport->selected->samisassessmentenddate) . '</strong></span>';
+                ' <strong>' . userdate($transferreport->selected->lasttransfertime) . '</strong></span>';
         }
 
         // Build a table.

@@ -222,6 +222,7 @@ class transfer_report extends \grade_report
             , gm.modifierid
             , gm.locked
             , gm.samisassessmentenddate
+            , gm.lasttransfertime
             , gl.id AS 'assessmentlookupid'
             , gl.samisassessmentid
             , gl.mabname AS 'samis_assessment_name'
