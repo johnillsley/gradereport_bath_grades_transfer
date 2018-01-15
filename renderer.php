@@ -346,8 +346,7 @@ class gradereport_transfer_renderer extends plugin_renderer_base
                 $data[] = $OUTPUT->user_picture($user, array('size' => 35, 'courseid' => $PAGE->course->id));
                 $data[] = $profilelink;
                 if ($transferreport->selected->moodle_activity_type == 'assign') {
-                    $data[] = $this->display_grade($grade) . " <a href='" . $singlegradeurl . "&userid=" . $user->id . "'
-class='btn btn-success'><i class=\"fa fa-pencil\"></i></a>";
+                    $data[] = $this->display_grade($grade);
                 } else {
                     $data[] = $this->display_grade($grade);
                 }
