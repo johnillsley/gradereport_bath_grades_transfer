@@ -142,8 +142,7 @@ if (!empty($outcomeoutput)) {
     echo $outcomeoutput;
 }
 if ($confirmtransfer == 0 && !empty($dotransfer)) {
-    if (!$transferreport->selected->is_blind_marking_turned_on || ($transferreport->selected->is_blind_marking_turned_on
-            && $transferreport->selected->revealidentities)) {
+    if (!$transferreport->is_blind_marking_enabled()) {
         $transferlist = $transferreport->get_transfer_list($dotransfer);
         echo $output->confirm_transfers($transferreport, $transferlist, $dotransfer);
     } else {
@@ -190,8 +189,9 @@ if (empty($dotransfer)) {
             $transferreport->silast = $silast;
             $transferreport->transferstatus = $transferstatus;
 
-            if (!$transferreport->selected->is_blind_marking_turned_on ||  ($transferreport->selected->is_blind_marking_turned_on
-                    && $transferreport->selected->revealidentities)) {
+            if (!$transferreport->selected->is_blind_marking_turned_on || ($transferreport->selected->is_blind_marking_turned_on
+                    && $transferreport->selected->revealidentities)
+            ) {
                 $module = array('name' => 'core_user', 'fullpath' => '/user/module.js');
                 $PAGE->requires->js_init_call('M.core_user.init_participation', null, false, $module);
 
