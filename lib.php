@@ -377,7 +377,23 @@ class transfer_report extends \grade_report
         // Require local plugin class.
         $gradetransfers = new \local_bath_grades_transfer();
         $assessmentgrades = new \local_bath_grades_transfer_assessment_grades();
-        $responses = $gradetransfers->transfer_mapping2($this->id, $transferlist, $assessmentgrades);
+        try {
+            $responses = $gradetransfers->transfer_mapping2($this->id, $transferlist, $assessmentgrades);
+        } catch (\Exception $e) {
+            // Get mapping details by id.
+            $mapping = $gradetransfers->assessmentmapping->get($this->id);
+            foreach ($transferlist as $userid) {
+                $gradetransfers->local_grades_transfer_log->outcomeid = TRANSFER_FAILURE;
+                $gradetransfers->local_grades_transfer_log->userid = $userid;
+                $gradetransfers->local_grades_transfer_log->timetransferred = time();
+                $gradetransfers->local_grades_transfer_log->assessmentlookupid = $mapping->assessmentlookupid;
+                $gradetransfers->local_grades_transfer_log->errormessage = $e->getMessage();
+                $gradetransfers->local_grades_transfer_log->coursemoduleid = $mapping->coursemodule;
+                $gradetransfers->local_grades_transfer_log->gradetransfermappingid = $this->id;
+                $gradetransfers->local_grades_transfer_log->save();
+            }
+            die;
+        }
         return $responses;
     }
 
@@ -550,5 +566,19 @@ class transfer_report extends \grade_report
         die;
         // Download all log for the current mapping ID.
 
+    }
+
+    /**
+     * Determine whether an assignment is blind marked or not
+     * @return bool
+     */
+    public function is_blind_marking_enabled() {
+        $isblindmarked = true;
+        if (!$this->selected->is_blind_marking_turned_on ||
+            ($this->selected->is_blind_marking_turned_on && $this->selected->revealidentities)
+        ) {
+            $isblindmarked = false;
+        }
+        return $isblindmarked;
     }
 }
