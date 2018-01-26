@@ -52,10 +52,6 @@ class gradereport_transfer_renderer extends plugin_renderer_base
             $transferreport->selected->moodle_activity_type .
             '/view.php?id=' . $transferreport->selected->coursemoduleid .
             '&action=grading';
-        $dotransfersurl = $CFG->wwwroot .
-            '/grade/report/transfer/index.php?id=' .
-            $transferreport->selected->course .
-            '&dotransfer=all&mappingid=' . $transferreport->id;
 
         $usermodifier = $DB->get_record('user', array('id' => $transferreport->selected->modifierid));
         $useraction = ($transferreport->selected->timecreated == $transferreport->selected->timemodified) ?
@@ -63,47 +59,17 @@ class gradereport_transfer_renderer extends plugin_renderer_base
             ' ' : get_string('lastmodifiedby', 'question') . ' ';
         $activityprogress = $transferreport->get_progress();
 
-        $warning = (!empty($transferreport->selected->locked)) ? ' <span class="label label-warning"> <i class="fa fa-lock"></i> ' .
+        $lockedstatus = (!empty($transferreport->selected->locked)) ? ' <span class="label label-warning"> <i class="fa fa-lock"></i> ' .
             get_string('locked', 'grades') . '</span>' : '';
-        // Current status indicator
-        if ($this->validmapping === false) { // TODO - USE CLASS IN LOCAL PLUGIN TO CHECK IF MAPPING IS VALID
-            // Transfer mapping no longer valid.
-            $status = '<span class="label label-danger">' . get_string('mappingnotvalid', 'gradereport_transfer') . '</span> ';
-            $status .= '<strong><a href="' . $editpageurl . '">' .
-                get_string('reconfiguremapping', 'gradereport_transfer') . '</a></strong>';
-            $warning .= ' <span class="label label-danger">' . get_string('thisnolongerexists', 'gradereport_transfer') . '</span>';
-        } else if (empty($transferreport->selected->samisassessmentenddate)) {
-            // Transfer time has not been specified.
-            $status = '<span class="label label-warning">' . get_string('transfernotscheduled', 'gradereport_transfer') . '</span>';
-            $status .= '<br/>' . get_string('youcaneither', 'gradereport_transfer');
-            $status .= ' <strong><a href="' . $editpageurl . '">' .
-                get_string('scheduletransfer', 'gradereport_transfer') . '</a></strong>';
-            $status .= get_string('triggermanually', 'gradereport_transfer');
-            $context = context_course::instance($PAGE->course->id);
-            if (has_capability('gradereport/transfer:transfer', $context) &&
-                !$transferreport->selected->is_blind_marking_turned_on
-            ) {
-                $status .= '<br/><a class="btn btn-default" href="' . $dotransfersurl . '">' .
-                    get_string('transferall', 'gradereport_transfer') . '</a>';
-            }
-
-        } else if ($transferreport->selected->samisassessmentenddate > time()) {
-            // Transfer will occur in the future.
-            $status = "<span class='label label-info'>" . get_string('transferscheduled', 'gradereport_transfer') .
-                ' <strong>' . userdate($transferreport->selected->samisassessmentenddate) . '</strong></span>';
-        } else {
-            // Transfer has already occurred.
-            $status = "<span class='label label-success'>" . get_string('transfercompleted', 'gradereport_transfer') .
-                ' <strong>' . userdate($transferreport->selected->lasttransfertime) . '</strong></span>';
-        }
-
+        // Current status indicator.
+        $status = $this->transfer_status($transferreport, $editpageurl);
         // Build a table.
         $table = new html_table();
         $table->attributes['class'] = 'generaltable';
 
         $table->data[] = array(
             get_string('mappingitem', 'gradereport_transfer') . $OUTPUT->help_icon('samis_assessment_name', 'gradereport_transfer'),
-            '<strong>' . $transferreport->selected->samis_assessment_name . '<strong>' . $warning
+            '<strong>' . $transferreport->selected->samis_assessment_name . '<strong>' . $lockedstatus
         );
         $table->data[] = array(
             get_string('mappingreference', 'gradereport_transfer') . $OUTPUT->help_icon('samis_code', 'gradereport_transfer'),
@@ -163,6 +129,48 @@ class gradereport_transfer_renderer extends plugin_renderer_base
             <i class=" text-success fa fa-file-excel-o"></i> Download CSV</a>');
 
         return html_writer::table($table);
+    }
+
+    private function transfer_status($transferreport, $editpageurl) {
+        $status = '';
+        global $PAGE, $CFG;
+        $dotransfersurl = $CFG->wwwroot .
+            '/grade/report/transfer/index.php?id=' .
+            $transferreport->selected->course .
+            '&dotransfer=all&mappingid=' . $transferreport->id;
+        if ($this->validmapping == false) {
+            // Transfer mapping no longer valid.
+            $status = '<span class="label label-danger">' . get_string('mappingnotvalid', 'gradereport_transfer') . '</span> ';
+            $status .= '<strong><a href="' . $editpageurl . '">' .
+                get_string('reconfiguremapping', 'gradereport_transfer') . '</a></strong>';
+            $warning = ' <span class="label label-danger">' . get_string('thisnolongerexists', 'gradereport_transfer') . '</span>';
+        }
+        if (empty($transferreport->selected->samisassessmentenddate)) {
+            // Suggest user to select end date.
+            // Transfer time has not been specified.
+            $status = '<span class="label label-warning">' . get_string('transfernotscheduled', 'gradereport_transfer') . '</span>';
+            $status .= '<br/>' . get_string('youcaneither', 'gradereport_transfer');
+            $status .= ' <strong><a href="' . $editpageurl . '">' .
+                get_string('scheduletransfer', 'gradereport_transfer') . '</a></strong>';
+            $status .= get_string('triggermanually', 'gradereport_transfer');
+            $context = context_course::instance($PAGE->course->id);
+            if (has_capability('gradereport/transfer:transfer', $context) &&
+                !$transferreport->is_blind_marking_enabled()
+            ) {
+                $status .= '<br/><a class="btn btn-default" href="' . $dotransfersurl . '">' .
+                    get_string('transferall', 'gradereport_transfer') . '</a>';
+            }
+        } else {
+            // Transfer will occur in the future.
+            $status = "<span class='label label-info'>" . get_string('transferscheduled', 'gradereport_transfer') .
+                ' <strong>' . userdate($transferreport->selected->samisassessmentenddate) . '</strong></span>';
+            if (!empty($transferreport->selected->lasttransfertime)) {
+                // Transfer has already occurred.
+                $status = "<span class='label label-success'>" . get_string('transfercompleted', 'gradereport_transfer') .
+                    ' <strong>' . userdate($transferreport->selected->lasttransfertime) . '</strong></span>';
+            }
+        }
+        return $status;
     }
 
     /**
