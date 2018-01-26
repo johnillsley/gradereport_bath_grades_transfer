@@ -379,6 +379,7 @@ class transfer_report extends \grade_report
         $assessmentgrades = new \local_bath_grades_transfer_assessment_grades();
         try {
             $responses = $gradetransfers->transfer_mapping2($this->id, $transferlist, $assessmentgrades);
+            return $responses;
         } catch (\Exception $e) {
             // Get mapping details by id.
             $mapping = $gradetransfers->assessmentmapping->get($this->id);
@@ -392,9 +393,7 @@ class transfer_report extends \grade_report
                 $gradetransfers->local_grades_transfer_log->gradetransfermappingid = $this->id;
                 $gradetransfers->local_grades_transfer_log->save();
             }
-            die;
         }
-        return $responses;
     }
 
     /**
