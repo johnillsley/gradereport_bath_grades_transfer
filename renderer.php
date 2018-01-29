@@ -27,6 +27,9 @@ defined('MOODLE_INTERNAL') || die();
 require_once($CFG->dirroot . '/user/lib.php');
 require_once($CFG->libdir . '/tablelib.php');
 
+/**
+ * Class gradereport_transfer_renderer
+ */
 class gradereport_transfer_renderer extends plugin_renderer_base
 {
 
@@ -59,7 +62,8 @@ class gradereport_transfer_renderer extends plugin_renderer_base
             ' ' : get_string('lastmodifiedby', 'question') . ' ';
         $activityprogress = $transferreport->get_progress();
 
-        $lockedstatus = (!empty($transferreport->selected->locked)) ? ' <span class="label label-warning"> <i class="fa fa-lock"></i> ' .
+        $lockedstatus = (!empty($transferreport->selected->locked)) ? ' <span class="label label-warning">
+ <i class="fa fa-lock"></i> ' .
             get_string('locked', 'grades') . '</span>' : '';
         // Current status indicator.
         $status = $this->transfer_status($transferreport, $editpageurl);
@@ -101,7 +105,7 @@ class gradereport_transfer_renderer extends plugin_renderer_base
         $table->data[] = array(
             get_string('moodleactivitytype', 'gradereport_transfer') .
             $OUTPUT->help_icon('moodle_activity_type', 'gradereport_transfer'),
-            ($transferreport->selected->moodle_activity_type == 'assign' ? 'Assignment' : $transferreport->selected->moodle_activity_type)
+            ($transferreport->selected->moodle_activity_type =='assign' ? 'Assignment' : $transferreport->selected->moodle_activity_type)
         );
         $table->data[] = array(
             get_string('moodleactivityname', 'gradereport_transfer') .
@@ -131,6 +135,11 @@ class gradereport_transfer_renderer extends plugin_renderer_base
         return html_writer::table($table);
     }
 
+    /**
+     * @param $transferreport
+     * @param $editpageurl
+     * @return string
+     */
     private function transfer_status($transferreport, $editpageurl) {
         $status = '';
         global $PAGE, $CFG;
@@ -255,8 +264,6 @@ class gradereport_transfer_renderer extends plugin_renderer_base
                 '/view.php?id=' . $transferreport->selected->coursemoduleid .
                 '&action=grader';
         }
-
-
         if ($gradelist->valid()) {
 
             $context = context_course::instance($PAGE->course->id);
@@ -546,7 +553,8 @@ class gradereport_transfer_renderer extends plugin_renderer_base
         } else {
             $output .= "<div class=\"alert alert-warning\" role=\"alert\">
             <i style=\"vertical-align: middle;\" class=\"fa fa-exclamation-triangle\" aria-hidden=\"true\"></i>
-            <span style='padding: 3px;'>No grades have been identified that need to be transferred at the moment. Please try again later</span></div>";
+            <span style='padding: 3px;'>No grades have been identified that need to be transferred at the moment.
+             Please try again later</span></div>";
             $output .= ' <a id = "cancel_grade_transfer" href="javascript:history.back()" class="btn btn-danger">' .
                 get_string('canceltransfer', 'gradereport_transfer') . '</a>';
         }
@@ -569,6 +577,10 @@ class gradereport_transfer_renderer extends plugin_renderer_base
         return (!empty($grade->finalgrade)) ? $gradedisplay . ' / ' . $maxdisplay : '';
     }
 
+    /**
+     * @param templatable $transferstatus
+     * @return bool|string
+     */
     public function render_transfer_status(\templatable $transferstatus) {
         global $DB;
         $data = $transferstatus->export_for_template($this);

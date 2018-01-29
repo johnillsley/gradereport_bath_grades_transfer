@@ -81,9 +81,13 @@ class transfer_report extends \grade_report
      */
     public $transferstatus;
 
+
     /**
-     * grade_report_bath_transfer constructor.
-     * @param integer $mappingid
+     * transfer_report constructor.
+     * @param int $courseid
+     * @param object $gpr
+     * @param string $context
+     * @param int|null $mappingid
      */
     public function __construct($courseid, $gpr, $context, $mappingid) {
         parent::__construct($courseid, $gpr, $context);
@@ -358,7 +362,7 @@ class transfer_report extends \grade_report
 
     /**
      * Put single student in an array so compatible with all & selected transfers
-     * @return array containing single userid
+     * @return array $userid Single user id
      */
     private function get_individual_user($userid) {
         if ($userid > 0) {
@@ -371,7 +375,6 @@ class transfer_report extends \grade_report
     /**
      * Pass student list to grade transfer method in local plugin
      * @param array $transferlist - userids
-     * @return array containing single userid
      */
     public function do_transfers($transferlist = array()) {
         // Require local plugin class.
@@ -491,10 +494,11 @@ class transfer_report extends \grade_report
         return $rs;
     }
 
+
     /**
-     * Returns user data with grades and transfer status required to populate the confirmation list prior to transferring grades
-     * @param array $tansfer_list - userids
-     * @return array $rs of objects
+     * Get final list of users to be transferred
+     * @param array $transferlist
+     * @return array
      */
     public function confirm_list($transferlist = array()) {
         global $DB;
@@ -523,7 +527,7 @@ class transfer_report extends \grade_report
         return $rs;
     }
 
-    /**
+    /** Download log as a CSV file.
      * @param $mappingid
      */
     public function download_log($mappingid) {
