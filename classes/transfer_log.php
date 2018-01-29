@@ -23,10 +23,20 @@ defined('MOODLE_INTERNAL') || die();
  */
 class transfer_log
 {
+    /**
+     * transfer_log constructor.
+     */
     public function __construct() {
 
     }
 
+    /** Add log entry to the database table
+     * @param $mapping
+     * @param $userid
+     * @param $outcomeid
+     * @param $gradetransferred
+     * @param null $error
+     */
     public function add($mapping, $userid, $outcomeid, $gradetransferred, $error = null) {
         global $DB;
         if (!empty($error)) {

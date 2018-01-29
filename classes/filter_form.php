@@ -30,6 +30,10 @@ defined('MOODLE_INTERNAL') || die;
 
 require_once($CFG->libdir . '/formslib.php');
 
+/**
+ * Class filter_form
+ * @package gradereport_transfer
+ */
 class filter_form extends \moodleform
 {
 
@@ -40,7 +44,6 @@ class filter_form extends \moodleform
 
         $mform = $this->_form;
         $course = $this->_customdata['course'];
-        // $years            = $this->_customdata['years'];.
         $mappingids = $this->_customdata['mappingids'];
         $selectedmapping = $this->_customdata['selected_mapping'];
         $transferstatus = $this->_customdata['transferstatus'];

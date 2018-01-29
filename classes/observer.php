@@ -15,8 +15,14 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 defined('MOODLE_INTERNAL') || die;
 
+/**
+ * Class gradereport_transfer_observer
+ */
 class gradereport_transfer_observer
 {
+    /**
+     * @param \gradereport_transfer\event\grade_report_queue_grade_transfer $event
+     */
     public static function transfer_grade_queue(\gradereport_transfer\event\grade_report_queue_grade_transfer $event) {
         global $CFG;
         require_once($CFG->dirroot . '/grade/report/transfer/lib.php');
