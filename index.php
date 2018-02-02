@@ -202,7 +202,7 @@ if (empty($dotransfer)) {
                 echo '<input type="hidden" name="dotransfer" value="selected" />';
                 echo '<input type="hidden" name="returnto" value="' . s($PAGE->url->out(false)) . '" />';
                 echo "<h5>" . get_string('transferlog', 'gradereport_transfer') .
-                    " (" . get_string('transferstatus' . $transferstatus, 'gradereport_transfer') . ")</h5>";
+                    " (" . get_string('transfer_status' . $transferstatus, 'gradereport_transfer') . ")</h5>";
                 $output->grade_transfer_table($transferreport);
                 if ($output->bulkactions && $output->validmapping) {
                     // ADD CAPABILITY HERE.
