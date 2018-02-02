@@ -214,7 +214,7 @@ class gradereport_transfer_renderer extends plugin_renderer_base
         $tableheaders[] = get_string('transferredgrade', 'gradereport_transfer');
 
         $tablecolumns[] = 'timetransferred';
-        $tableheaders[] = get_string('transferstatus', 'gradereport_transfer');
+        $tableheaders[] = get_string('transfer_status', 'gradereport_transfer');
 
         $tablecolumns[] = 'transferhistory';
         $tableheaders[] = 'Transfer History';
