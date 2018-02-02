@@ -21,13 +21,36 @@ use templatable;
 
 defined('MOODLE_INTERNAL') || die();
 
+/**
+ * Class transfer_status
+ * @package gradereport_transfer\output
+ */
 class transfer_status implements renderable, templatable
 {
+    /**
+     * @var
+     */
     public $userid;
+    /**
+     * @var
+     */
     public $status;
+    /**
+     * @var null
+     */
     public $mark;
+    /**
+     * @var null
+     */
     public $reason;
 
+    /**
+     * transfer_status constructor.
+     * @param $userid
+     * @param $status
+     * @param null $mark
+     * @param null $reason
+     */
     public function __construct($userid, $status, $mark = null, $reason = null) {
         $this->userid = $userid;
         $this->status = $status;
@@ -35,6 +58,10 @@ class transfer_status implements renderable, templatable
         $this->reason = $reason;
     }
 
+    /**
+     * @param renderer_base $output
+     * @return \stdClass
+     */
     public function export_for_template(renderer_base $output) {
         $data = new \stdClass();
         $data->userid = $this->userid;
