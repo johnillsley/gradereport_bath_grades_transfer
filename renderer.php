@@ -120,7 +120,7 @@ class gradereport_transfer_renderer extends plugin_renderer_base
             '(<strong><a href="' . $gradespageurl . '">click here to see current grades</a></strong>)'
         );
         $table->data[] = array(
-            get_string('transferstatus', 'gradereport_transfer') . $OUTPUT->help_icon('transfer_status', 'gradereport_transfer'),
+            get_string('transfer_status', 'gradereport_transfer') . $OUTPUT->help_icon('transfer_status', 'gradereport_transfer'),
             $status
         );
         $table->data[] = array(
