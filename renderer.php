@@ -124,7 +124,7 @@ class gradereport_transfer_renderer extends plugin_renderer_base
             $status
         );
         $table->data[] = array(
-            get_string('mappingdetails', 'gradereport_transfer') .
+            get_string('transfer_mapping_details', 'gradereport_transfer') .
             $OUTPUT->help_icon('transfer_mapping_details', 'gradereport_transfer'),
             $useraction . fullname($usermodifier) . " on " . userdate($transferreport->selected->timemodified)
         );
