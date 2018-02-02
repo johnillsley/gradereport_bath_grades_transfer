@@ -72,7 +72,7 @@ class gradereport_transfer_renderer extends plugin_renderer_base
         $table->attributes['class'] = 'generaltable';
 
         $table->data[] = array(
-            get_string('mappingitem', 'gradereport_transfer') . $OUTPUT->help_icon('samis_assessment_name', 'gradereport_transfer'),
+            get_string('samis_assessment_name', 'gradereport_transfer') . $OUTPUT->help_icon('samis_assessment_name', 'gradereport_transfer'),
             '<strong>' . $transferreport->selected->samis_assessment_name . '<strong>' . $lockedstatus
         );
         $table->data[] = array(

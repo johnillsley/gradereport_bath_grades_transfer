@@ -92,7 +92,6 @@ $string['samis_code_help'] = 'Internal use only';
 $string['samis_code'] = 'SAMIS Assessment Code';
 $string['samis_assessment_name_help'] = 'SAMIS Assessment Name from MAB table in SAMIS';
 $string['samis_assessment_name'] = 'SAMIS Assessment Name';
-$string['samis_code'] = 'SAMIS Assessment Code';
 $string['moodle_activity_type_help'] = 'Type of Moodle Activity to send grades for';
 $string['moodle_activity_type'] = 'Moodle Activity Type';
 $string['moodle_activity_completion_help'] = 'Grades that have been successfully transferred to SAMIS will not be overwritten. If Moodle grades are updated after the transfer has taken place, the relevant SAMIS records will need be updated manually.';
