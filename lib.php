@@ -115,6 +115,7 @@ class transfer_report extends \grade_report
             ON ra.userid = u.id
             AND contextid = :contextid
             AND roleid = 5 /* student role */
+            AND ra.id = me.ra_id
         /***** join moodle activity information relating to mapping including current grade *****/
         JOIN {course_modules} cm ON cm.id = gm.coursemodule
         JOIN {modules} mo ON mo.id = cm.module
@@ -472,7 +473,7 @@ class transfer_report extends \grade_report
                 break;
         }
         $this->matchcount = $DB->count_records_sql("SELECT COUNT(ue.userid) " . $this->sqlfrom, $this->sqlparams);
-
+        $DB->set_debug(true);
         $rs = $DB->get_recordset_sql("
             SELECT
               u.lastname
@@ -490,6 +491,7 @@ class transfer_report extends \grade_report
             , log.gradetransferred
             " . $this->sqlfrom . $ordersql, $this->sqlparams, $limitfrom, $limitnum
         );
+        $DB->set_debug(false);
 
         return $rs;
     }
@@ -523,7 +525,6 @@ class transfer_report extends \grade_report
             , log.outcomeid
             " . $this->sqlfrom . $subsetsql . $orderby, $this->sqlparams
         );
-
         return $rs;
     }
 
