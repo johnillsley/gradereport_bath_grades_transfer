@@ -473,7 +473,6 @@ class transfer_report extends \grade_report
                 break;
         }
         $this->matchcount = $DB->count_records_sql("SELECT COUNT(ue.userid) " . $this->sqlfrom, $this->sqlparams);
-        $DB->set_debug(true);
         $rs = $DB->get_recordset_sql("
             SELECT
               u.lastname
@@ -491,7 +490,6 @@ class transfer_report extends \grade_report
             , log.gradetransferred
             " . $this->sqlfrom . $ordersql, $this->sqlparams, $limitfrom, $limitnum
         );
-        $DB->set_debug(false);
 
         return $rs;
     }
