@@ -59,7 +59,7 @@ class filter_form extends \moodleform
 
         $selectstatus = $mform->addElement(
             'select', 'transferstatus',
-            get_string('transferstatus',
+            get_string('transfer_status',
                 'gradereport_transfer'),
             $transferstatus
         );
