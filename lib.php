@@ -298,7 +298,7 @@ class transfer_report extends \grade_report
     public function get_status_options() {
         $options = array();
         for ($statusid = 0; $statusid < 6; $statusid++) {
-            $options[] = get_string('transferstatus' . $statusid, 'gradereport_transfer');
+            $options[] = get_string('transfer_status' . $statusid, 'gradereport_transfer');
         }
         return $options;
     }

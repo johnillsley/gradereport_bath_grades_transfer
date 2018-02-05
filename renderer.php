@@ -477,7 +477,7 @@ class gradereport_transfer_renderer extends plugin_renderer_base
             get_string('fullnameuser'),
             get_string('grade'),
             get_string('lastgraded', 'gradereport_transfer'),
-            get_string('transferstatus', 'gradereport_transfer') . $OUTPUT->help_icon('transfer_status', 'gradereport_transfer')
+            get_string('transfer_status', 'gradereport_transfer') . $OUTPUT->help_icon('transfer_status', 'gradereport_transfer')
         );
         foreach ($confirmlist as $confirmitem) {
             $user = $DB->get_record('user', array('id' => $confirmitem->userid));
