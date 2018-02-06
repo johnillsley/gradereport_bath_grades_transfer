@@ -26,7 +26,6 @@
 namespace gradereport_transfer;
 defined('MOODLE_INTERNAL') || die();
 require_once($CFG->dirroot . '/grade/report/lib.php');
-require_once($CFG->dirroot . '/grade/report/transfer/classes/grade_transfer.php');
 require_once($CFG->dirroot . '/local/bath_grades_transfer/lib.php');
 require_once($CFG->dirroot . '/local/bath_grades_transfer/classes/assessment_grades.php');
 require_once($CFG->libdir . '/csvlib.class.php');
