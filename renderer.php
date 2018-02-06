@@ -216,9 +216,10 @@ class gradereport_transfer_renderer extends plugin_renderer_base
         $tablecolumns[] = 'timetransferred';
         $tableheaders[] = get_string('transfer_status', 'gradereport_transfer');
 
-        $tablecolumns[] = 'transferhistory';
-        $tableheaders[] = 'Transfer History';
-
+        if (is_siteadmin()) {
+            $tablecolumns[] = 'transferhistory';
+            $tableheaders[] = 'Transfer History';
+        }
         $tablecolumns[] = 'transfernow';
         $tableheaders[] = get_string('dotransfernow', 'gradereport_transfer');
 
