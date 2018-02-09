@@ -26,9 +26,9 @@
 namespace gradereport_transfer;
 defined('MOODLE_INTERNAL') || die();
 require_once($CFG->dirroot . '/grade/report/lib.php');
-require_once($CFG->dirroot . '/grade/report/transfer/classes/grade_transfer.php');
 require_once($CFG->dirroot . '/local/bath_grades_transfer/lib.php');
 require_once($CFG->dirroot . '/local/bath_grades_transfer/classes/assessment_grades.php');
+require_once($CFG->libdir . '/csvlib.class.php');
 
 /**
  * Class providing core functionality for the grade transfer report
@@ -80,14 +80,19 @@ class transfer_report extends \grade_report
      */
     public $transferstatus;
 
+
     /**
-     * grade_report_bath_transfer constructor.
-     * @param integer $mappingid
+     * transfer_report constructor.
+     * @param int $courseid
+     * @param object $gpr
+     * @param string $context
+     * @param int|null $mappingid
      */
     public function __construct($courseid, $gpr, $context, $mappingid) {
         parent::__construct($courseid, $gpr, $context);
 
         $this->id = $mappingid;
+        $this->courseid = $courseid;
         $this->sqlfrom = "
         /***** get the grade transfer mapping *****/
         FROM {local_bath_grades_mapping} gm
@@ -105,11 +110,11 @@ class transfer_report extends \grade_report
         JOIN {sits_mappings_enrols} me ON me.map_id = sm.id
         JOIN {user_enrolments} ue ON ue.id = me.u_enrol_id -- PROBLEM WITH user_enrolments BEING REMOVED!!!
         JOIN {user} u ON u.id = ue.userid
-        JOIN {role_assignments} ra 
-            ON ra.userid = u.id AND ra.id = me.ra_id
+        JOIN {role_assignments} ra
+            ON ra.userid = u.id
             AND contextid = :contextid
             AND roleid = 5 /* student role */
-            
+            AND ra.id = me.ra_id
         /***** join moodle activity information relating to mapping including current grade *****/
         JOIN {course_modules} cm ON cm.id = gm.coursemodule
         JOIN {modules} mo ON mo.id = cm.module
@@ -147,7 +152,7 @@ class transfer_report extends \grade_report
         $this->sqlparams['contextid'] = $context->id;
 
         $this->sqlreadytotransfer = "
-        AND (log.outcomeid NOT IN (" . TRANSFER_SUCCESS . "," . GRADE_QUEUED . "," .GRADE_ALREADY_EXISTS. ")
+        AND (log.outcomeid NOT IN (" . TRANSFER_SUCCESS . "," . GRADE_QUEUED . "," . GRADE_ALREADY_EXISTS . ")
         OR log.outcomeid IS NULL) -- already transferred or queued
         AND gg.finalgrade IS NOT NULL
         AND CEIL(gg.finalgrade) = gg.finalgrade
@@ -221,6 +226,7 @@ class transfer_report extends \grade_report
             , gm.modifierid
             , gm.locked
             , gm.samisassessmentenddate
+            , gm.lasttransfertime
             , gl.id AS 'assessmentlookupid'
             , gl.samisassessmentid
             , gl.mabname AS 'samis_assessment_name'
@@ -229,6 +235,7 @@ class transfer_report extends \grade_report
             , gl.mabseq
             ,gl.astcode
             ,gl.mabperc
+            ,gl.mabpnam
             , gl.periodslotcode
             , gl.expired
             , cm.course
@@ -268,6 +275,7 @@ class transfer_report extends \grade_report
             $moodlemodule = $DB->get_record($mapping->moodle_activity_type, array('id' => $mapping->instance));
             $mapping->moodle_activity_name = $moodlemodule->name;
             // Condition for blind marking.
+            $mapping->is_blind_marking_turned_on = 0;
             if (isset($moodlemodule->blindmarking)) {
                 $mapping->is_blind_marking_turned_on = $moodlemodule->blindmarking;
                 $mapping->revealidentities = $moodlemodule->revealidentities;
@@ -290,7 +298,7 @@ class transfer_report extends \grade_report
     public function get_status_options() {
         $options = array();
         for ($statusid = 0; $statusid < 6; $statusid++) {
-            $options[] = get_string('transferstatus' . $statusid, 'gradereport_transfer');
+            $options[] = get_string('transfer_status' . $statusid, 'gradereport_transfer');
         }
         return $options;
     }
@@ -354,7 +362,7 @@ class transfer_report extends \grade_report
 
     /**
      * Put single student in an array so compatible with all & selected transfers
-     * @return array containing single userid
+     * @return array $userid Single user id
      */
     private function get_individual_user($userid) {
         if ($userid > 0) {
@@ -367,13 +375,28 @@ class transfer_report extends \grade_report
     /**
      * Pass student list to grade transfer method in local plugin
      * @param array $transferlist - userids
-     * @return array containing single userid
      */
     public function do_transfers($transferlist = array()) {
         // Require local plugin class.
         $gradetransfers = new \local_bath_grades_transfer();
-        $responses = $gradetransfers->transfer_mapping2($this->id, $transferlist);
-        return $responses;
+        $assessmentgrades = new \local_bath_grades_transfer_assessment_grades();
+        try {
+            $responses = $gradetransfers->transfer_mapping2($this->id, $transferlist, $assessmentgrades);
+            return $responses;
+        } catch (\Exception $e) {
+            // Get mapping details by id.
+            $mapping = $gradetransfers->assessmentmapping->get($this->id);
+            foreach ($transferlist as $userid) {
+                $gradetransfers->local_grades_transfer_log->outcomeid = TRANSFER_FAILURE;
+                $gradetransfers->local_grades_transfer_log->userid = $userid;
+                $gradetransfers->local_grades_transfer_log->timetransferred = time();
+                $gradetransfers->local_grades_transfer_log->assessmentlookupid = $mapping->assessmentlookupid;
+                $gradetransfers->local_grades_transfer_log->errormessage = $e->getMessage();
+                $gradetransfers->local_grades_transfer_log->coursemoduleid = $mapping->coursemodule;
+                $gradetransfers->local_grades_transfer_log->gradetransfermappingid = $this->id;
+                $gradetransfers->local_grades_transfer_log->save();
+            }
+        }
     }
 
     /**
@@ -398,17 +421,19 @@ class transfer_report extends \grade_report
      * @param object $table - required for paging information
      * @return \moodle_recordset $rs
      */
-    public function user_list($table) {
+    public function user_list($table = null) {
         global $DB;
 
-        $limitfrom = $table->get_page_start();
-        $limitnum = $table->get_page_size();
+        $limitfrom = (isset($table) ? $table->get_page_start() : '0');
+        $limitnum = (isset($table) ? $table->get_page_size() : '0');
 
         $ordersql = "";
-        if ($orderby = $table->get_sql_sort()) {
-            $ordersql .= ' ORDER BY ' . $orderby . ' ';
-        } else {
-            $ordersql .= ' ORDER BY lastname, firstname';
+        if (isset($table)) {
+            if ($orderby = $table->get_sql_sort()) {
+                $ordersql .= ' ORDER BY ' . $orderby . ' ';
+            } else {
+                $ordersql .= ' ORDER BY lastname, firstname';
+            }
         }
 
         $this->totalcount = $DB->count_records_sql("SELECT COUNT(ue.userid) " . $this->sqlfrom, $this->sqlparams);
@@ -447,7 +472,6 @@ class transfer_report extends \grade_report
                 break;
         }
         $this->matchcount = $DB->count_records_sql("SELECT COUNT(ue.userid) " . $this->sqlfrom, $this->sqlparams);
-
         $rs = $DB->get_recordset_sql("
             SELECT
               u.lastname
@@ -469,10 +493,11 @@ class transfer_report extends \grade_report
         return $rs;
     }
 
+
     /**
-     * Returns user data with grades and transfer status required to populate the confirmation list prior to transferring grades
-     * @param array $tansfer_list - userids
-     * @return array $rs of objects
+     * Get final list of users to be transferred
+     * @param array $transferlist
+     * @return array
      */
     public function confirm_list($transferlist = array()) {
         global $DB;
@@ -497,7 +522,64 @@ class transfer_report extends \grade_report
             , log.outcomeid
             " . $this->sqlfrom . $subsetsql . $orderby, $this->sqlparams
         );
-
         return $rs;
+    }
+
+    /** Download log as a CSV file.
+     * @param $mappingid
+     */
+    public function download_log($mappingid) {
+        $this->get_mapping_options($this->courseid);
+        $filename = "transfer-log-" . $this->selected->samisassessmentid;
+        $logdata = array();
+        $fields = array(
+            'firstname' => 'First Name',
+            'lastname' => 'Last Name',
+            'finalgrade' => 'Grade',
+            'timegraded' => 'Last Graded',
+            'itemname' => 'Moodle Activity',
+            'itemmodule' => 'Activity Type',
+            'timetransferred' => 'Time Transferred',
+            'gradetransferred' => 'Transferred Grade',
+            'transfer_outcome' => 'Transfer Status'
+        );
+        $this->id = $mappingid;
+
+        $csvexport = new \csv_export_writer();
+        $csvexport->set_filename($filename);
+        $csvexport->add_data($fields);
+        $gradelist = $this->user_list();
+        foreach ($gradelist as $grade) {
+            foreach ($fields as $key => $field) {
+                $data = $grade->$key;
+                if ($key == 'rawgrademax') {
+                    continue;
+                }
+                if (($key == 'timegraded' || $key == 'timetransferred') && !is_null($data)) {
+                    $data = userdate($data);
+                }
+                $logdata[$key] = $data;
+            }
+            $csvexport->add_data($logdata);
+        }
+        $csvexport->add_data($logdata);
+        $csvexport->download_file();
+        die;
+        // Download all log for the current mapping ID.
+
+    }
+
+    /**
+     * Determine whether an assignment is blind marked or not
+     * @return bool
+     */
+    public function is_blind_marking_enabled() {
+        $isblindmarked = true;
+        if (!$this->selected->is_blind_marking_turned_on ||
+            ($this->selected->is_blind_marking_turned_on && $this->selected->revealidentities)
+        ) {
+            $isblindmarked = false;
+        }
+        return $isblindmarked;
     }
 }

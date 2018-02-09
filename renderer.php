@@ -27,6 +27,9 @@ defined('MOODLE_INTERNAL') || die();
 require_once($CFG->dirroot . '/user/lib.php');
 require_once($CFG->libdir . '/tablelib.php');
 
+/**
+ * Class gradereport_transfer_renderer
+ */
 class gradereport_transfer_renderer extends plugin_renderer_base
 {
 
@@ -52,10 +55,6 @@ class gradereport_transfer_renderer extends plugin_renderer_base
             $transferreport->selected->moodle_activity_type .
             '/view.php?id=' . $transferreport->selected->coursemoduleid .
             '&action=grading';
-        $dotransfersurl = $CFG->wwwroot .
-            '/grade/report/transfer/index.php?id=' .
-            $transferreport->selected->course .
-            '&dotransfer=all&mappingid=' . $transferreport->id;
 
         $usermodifier = $DB->get_record('user', array('id' => $transferreport->selected->modifierid));
         $useraction = ($transferreport->selected->timecreated == $transferreport->selected->timemodified) ?
@@ -63,46 +62,18 @@ class gradereport_transfer_renderer extends plugin_renderer_base
             ' ' : get_string('lastmodifiedby', 'question') . ' ';
         $activityprogress = $transferreport->get_progress();
 
-        $warning = (!empty($transferreport->selected->locked)) ? ' <span class="label label-warning"> <i class="fa fa-lock"></i> ' .
+        $lockedstatus = (!empty($transferreport->selected->locked)) ? ' <span class="label label-warning">
+ <i class="fa fa-lock"></i> ' .
             get_string('locked', 'grades') . '</span>' : '';
-        // Current status indicator
-        if ($this->validmapping === false) { // TODO - USE CLASS IN LOCAL PLUGIN TO CHECK IF MAPPING IS VALID
-            // Transfer mapping no longer valid.
-            $status = '<span class="label label-danger">' . get_string('mappingnotvalid', 'gradereport_transfer') . '</span> ';
-            $status .= '<strong><a href="' . $editpageurl . '">' .
-                get_string('reconfiguremapping', 'gradereport_transfer') . '</a></strong>';
-            $warning .= ' <span class="label label-danger">' . get_string('thisnolongerexists', 'gradereport_transfer') . '</span>';
-        } else if (empty($transferreport->selected->samisassessmentenddate)) {
-            // Transfer time has not been specified.
-            $status = '<span class="label label-warning">' . get_string('transfernotscheduled', 'gradereport_transfer') . '</span>';
-            $status .= '<br/>' . get_string('youcaneither', 'gradereport_transfer');
-            $status .= ' <strong><a href="' . $editpageurl . '">' .
-                get_string('scheduletransfer', 'gradereport_transfer') . '</a></strong>';
-            $status .= get_string('triggermanually', 'gradereport_transfer');
-            $context = context_course::instance($PAGE->course->id);
-            if (has_capability('gradereport/transfer:transfer', $context) &&
-                !$transferreport->selected->is_blind_marking_turned_on) {
-                $status .= '<br/><a class="btn btn-default" href="' . $dotransfersurl . '">' .
-                    get_string('transferall', 'gradereport_transfer') . '</a>';
-            }
-
-        } else if ($transferreport->selected->samisassessmentenddate > time()) {
-            // Transfer will occur in the future.
-            $status = "<span class='label label-info'>".get_string('transferscheduled', 'gradereport_transfer') .
-                ' <strong>' . userdate($transferreport->selected->samisassessmentenddate) . '</strong></span>';
-        } else {
-            // Transfer has already occurred.
-            $status = "<span class='label label-success'>".get_string('transfercompleted', 'gradereport_transfer') .
-                ' <strong>' . userdate($transferreport->selected->samisassessmentenddate) . '</strong></span>';
-        }
-
+        // Current status indicator.
+        $status = $this->transfer_status($transferreport, $editpageurl);
         // Build a table.
         $table = new html_table();
         $table->attributes['class'] = 'generaltable';
 
         $table->data[] = array(
-            get_string('mappingitem', 'gradereport_transfer') . $OUTPUT->help_icon('samis_assessment_name', 'gradereport_transfer'),
-            '<strong>' . $transferreport->selected->samis_assessment_name . '<strong>' . $warning
+            get_string('samis_assessment_name', 'gradereport_transfer') . $OUTPUT->help_icon('samis_assessment_name', 'gradereport_transfer'),
+            '<strong>' . $transferreport->selected->samis_assessment_name . '<strong>' . $lockedstatus
         );
         $table->data[] = array(
             get_string('mappingreference', 'gradereport_transfer') . $OUTPUT->help_icon('samis_code', 'gradereport_transfer'),
@@ -128,10 +99,13 @@ class gradereport_transfer_renderer extends plugin_renderer_base
             get_string('mabperc', 'gradereport_transfer'),
             $transferreport->selected->mabperc
         );
+        $table->data[] = array(get_string('samis_anon', 'gradereport_transfer') .
+            $OUTPUT->help_icon('samis_anon', 'gradereport_transfer'),
+            $transferreport->selected->mabpnam);
         $table->data[] = array(
             get_string('moodleactivitytype', 'gradereport_transfer') .
             $OUTPUT->help_icon('moodle_activity_type', 'gradereport_transfer'),
-            ($transferreport->selected->moodle_activity_type == 'assign' ? 'Assignment' : $transferreport->selected->moodle_activity_type)
+            ($transferreport->selected->moodle_activity_type =='assign' ? 'Assignment' : $transferreport->selected->moodle_activity_type)
         );
         $table->data[] = array(
             get_string('moodleactivityname', 'gradereport_transfer') .
@@ -142,22 +116,70 @@ class gradereport_transfer_renderer extends plugin_renderer_base
         $table->data[] = array(
             get_string('moodleactivitycompletion', 'gradereport_transfer') .
             $OUTPUT->help_icon('moodle_activity_completion', 'gradereport_transfer'),
-            'Currently ' . $activityprogress->graded . ' out of
-                ' . $activityprogress->total . ' have been graded,
-                ' . $activityprogress->transferred . ' have been transferred to SAMIS.
-                (<strong><a href="' . $gradespageurl . '">click here to see current grades</a></strong>)'
+            get_string('transfer_progress_label', 'gradereport_transfer', $activityprogress) .
+            '(<strong><a href="' . $gradespageurl . '">click here to see current grades</a></strong>)'
         );
         $table->data[] = array(
-            get_string('transferstatus', 'gradereport_transfer') . $OUTPUT->help_icon('transfer_status', 'gradereport_transfer'),
+            get_string('transfer_status', 'gradereport_transfer') . $OUTPUT->help_icon('transfer_status', 'gradereport_transfer'),
             $status
         );
         $table->data[] = array(
-            get_string('mappingdetails', 'gradereport_transfer') .
+            get_string('transfer_mapping_details', 'gradereport_transfer') .
             $OUTPUT->help_icon('transfer_mapping_details', 'gradereport_transfer'),
             $useraction . fullname($usermodifier) . " on " . userdate($transferreport->selected->timemodified)
         );
+        $table->data[] = array('Log Export', '<a href="index.php?action=download_log&id='
+            . $PAGE->course->id . '&mappingid=' . $transferreport->id . '">
+            <i class=" text-success fa fa-file-excel-o"></i> Download CSV</a>');
 
         return html_writer::table($table);
+    }
+
+    /**
+     * @param $transferreport
+     * @param $editpageurl
+     * @return string
+     */
+    private function transfer_status($transferreport, $editpageurl) {
+        $status = '';
+        global $PAGE, $CFG;
+        $dotransfersurl = $CFG->wwwroot .
+            '/grade/report/transfer/index.php?id=' .
+            $transferreport->selected->course .
+            '&dotransfer=all&mappingid=' . $transferreport->id;
+        if ($this->validmapping == false) {
+            // Transfer mapping no longer valid.
+            $status = '<span class="label label-danger">' . get_string('mappingnotvalid', 'gradereport_transfer') . '</span> ';
+            $status .= '<strong><a href="' . $editpageurl . '">' .
+                get_string('reconfiguremapping', 'gradereport_transfer') . '</a></strong>';
+            $warning = ' <span class="label label-danger">' . get_string('thisnolongerexists', 'gradereport_transfer') . '</span>';
+        }
+        if (empty($transferreport->selected->samisassessmentenddate)) {
+            // Suggest user to select end date.
+            // Transfer time has not been specified.
+            $status = '<span class="label label-warning">' . get_string('transfernotscheduled', 'gradereport_transfer') . '</span>';
+            $status .= '<br/>' . get_string('youcaneither', 'gradereport_transfer');
+            $status .= ' <strong><a href="' . $editpageurl . '">' .
+                get_string('scheduletransfer', 'gradereport_transfer') . '</a></strong>';
+            $status .= get_string('triggermanually', 'gradereport_transfer');
+            $context = context_course::instance($PAGE->course->id);
+            if (has_capability('gradereport/transfer:transfer', $context) &&
+                !$transferreport->is_blind_marking_enabled()
+            ) {
+                $status .= '<br/><a class="btn btn-default" href="' . $dotransfersurl . '">' .
+                    get_string('transferall', 'gradereport_transfer') . '</a>';
+            }
+        } else {
+            // Transfer will occur in the future.
+            $status = "<span class='label label-info'>" . get_string('transferscheduled', 'gradereport_transfer') .
+                ' <strong>' . userdate($transferreport->selected->samisassessmentenddate) . '</strong></span>';
+            if (!empty($transferreport->selected->lasttransfertime)) {
+                // Transfer has already occurred.
+                $status = "<span class='label label-success'>" . get_string('transfercompleted', 'gradereport_transfer') .
+                    ' <strong>' . userdate($transferreport->selected->lasttransfertime) . '</strong></span>';
+            }
+        }
+        return $status;
     }
 
     /**
@@ -192,11 +214,12 @@ class gradereport_transfer_renderer extends plugin_renderer_base
         $tableheaders[] = get_string('transferredgrade', 'gradereport_transfer');
 
         $tablecolumns[] = 'timetransferred';
-        $tableheaders[] = get_string('transferstatus', 'gradereport_transfer');
+        $tableheaders[] = get_string('transfer_status', 'gradereport_transfer');
 
-        $tablecolumns[] = 'transferhistory';
-        $tableheaders[] = 'Transfer History';
-
+        if (is_siteadmin()) {
+            $tablecolumns[] = 'transferhistory';
+            $tableheaders[] = 'Transfer History';
+        }
         $tablecolumns[] = 'transfernow';
         $tableheaders[] = get_string('dotransfernow', 'gradereport_transfer');
 
@@ -234,14 +257,14 @@ class gradereport_transfer_renderer extends plugin_renderer_base
 
         $table->pagesize = $transferreport->perpage;
         $table->use_pages = true;
-
         $gradelist = $transferreport->user_list($table);
         $table->pagesize($transferreport->perpage, $transferreport->matchcount);
-        $singlegradeurl = $CFG->wwwroot .'/mod/'.
-            $transferreport->selected->moodle_activity_type .
-            '/view.php?id=' . $transferreport->selected->coursemoduleid .
-            '&action=grader';
-
+        if ($transferreport->selected->moodle_activity_type == 'assign') {
+            $singlegradeurl = $CFG->wwwroot . '/mod/' .
+                $transferreport->selected->moodle_activity_type .
+                '/view.php?id=' . $transferreport->selected->coursemoduleid .
+                '&action=grader';
+        }
         if ($gradelist->valid()) {
 
             $context = context_course::instance($PAGE->course->id);
@@ -256,7 +279,7 @@ class gradereport_transfer_renderer extends plugin_renderer_base
                 $transferallowed = true;
                 if ($grade->outcomeid != 1) {
                     // The grade has not been successfully transferred yet.
-                    if ($grade->outcomeid == GRADE_QUEUED || $grade->outcomeid == GRADE_ALREADY_EXISTS ) {
+                    if ($grade->outcomeid == GRADE_QUEUED || $grade->outcomeid == GRADE_ALREADY_EXISTS) {
                         $transferstatus = '<span class="label label-warning">' .
                             $grade->transfer_outcome . '</span> ' . '<span class="label label-info">' .
                             userdate($grade->timetransferred) . '</span>';
@@ -338,7 +361,12 @@ class gradereport_transfer_renderer extends plugin_renderer_base
                 $data[] = $checkbox;
                 $data[] = $OUTPUT->user_picture($user, array('size' => 35, 'courseid' => $PAGE->course->id));
                 $data[] = $profilelink;
-                $data[] = $this->display_grade($grade);
+                if ($transferreport->selected->moodle_activity_type == 'assign') {
+                    $data[] = $this->display_grade($grade);
+                } else {
+                    $data[] = $this->display_grade($grade);
+                }
+
                 $data[] = $timegraded;
                 $data[] = $gradetransferred;
                 $data[] = $transferstatus;
@@ -390,7 +418,7 @@ class gradereport_transfer_renderer extends plugin_renderer_base
     /**
      * Output of search form for finding users by name in the grade transfer table
      * @param transfer report object $transferreport
-     * @param moodle_url object $baseurl - additional form parameters that are needed to return to the correct mapping
+     * @param moodle_url $baseurl - additional form parameters that are needed to return to the correct mapping
      * @return string
      */
     public function table_name_search_form($transferreport, $baseurl) {
@@ -450,7 +478,7 @@ class gradereport_transfer_renderer extends plugin_renderer_base
             get_string('fullnameuser'),
             get_string('grade'),
             get_string('lastgraded', 'gradereport_transfer'),
-            get_string('transferstatus', 'gradereport_transfer') . $OUTPUT->help_icon('transfer_status', 'gradereport_transfer')
+            get_string('transfer_status', 'gradereport_transfer') . $OUTPUT->help_icon('transfer_status', 'gradereport_transfer')
         );
         foreach ($confirmlist as $confirmitem) {
             $user = $DB->get_record('user', array('id' => $confirmitem->userid));
@@ -525,14 +553,16 @@ class gradereport_transfer_renderer extends plugin_renderer_base
             $output .= '</form>';
         } else {
             $output .= "<div class=\"alert alert-warning\" role=\"alert\">
-            <i style=\"vertical-align: middle;\" class=\"fa fa-exclamation-triangle fa-3x\" aria-hidden=\"true\"></i>
-            <span style='padding: 3px;font-size: 16px;'>No grades to transfer</span></div>";
+            <i style=\"vertical-align: middle;\" class=\"fa fa-exclamation-triangle\" aria-hidden=\"true\"></i>
+            <span style='padding: 3px;'>No grades have been identified that need to be transferred at the moment.
+             Please try again later</span></div>";
             $output .= ' <a id = "cancel_grade_transfer" href="javascript:history.back()" class="btn btn-danger">' .
                 get_string('canceltransfer', 'gradereport_transfer') . '</a>';
         }
 
         return $output;
     }
+
     /**
      * Output of formatted grade
      * @param object $grade
@@ -548,6 +578,10 @@ class gradereport_transfer_renderer extends plugin_renderer_base
         return (!empty($grade->finalgrade)) ? $gradedisplay . ' / ' . $maxdisplay : '';
     }
 
+    /**
+     * @param templatable $transferstatus
+     * @return bool|string
+     */
     public function render_transfer_status(\templatable $transferstatus) {
         global $DB;
         $data = $transferstatus->export_for_template($this);

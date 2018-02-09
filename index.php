@@ -49,7 +49,7 @@ $search = optional_param('search', '', PARAM_RAW);
 $sifirst = optional_param('sifirst', '', PARAM_RAW);
 $silast = optional_param('silast', '', PARAM_RAW);
 $currentgroup = 0;
-
+$action = optional_param('action', '', PARAM_RAW);
 $title = get_string('pluginname', 'gradereport_transfer');
 global $PAGE, $DB;
 $PAGE->set_url('/grade/report/transfer/index.php'
@@ -104,6 +104,10 @@ if (!$access) {
 $gpr = new grade_plugin_return(array('type' => 'report', 'plugin' => 'transfer', 'courseid' => $course->id));
 
 $transferreport = new \gradereport_transfer\transfer_report($course->id, $gpr, $context, $mappingid);
+if ($action == 'download_log') {
+    $transferreport->download_log($mappingid);
+    die;
+}
 $transferreport->get_mapping_options($course->id, $year);
 if (!empty($transferreport->selected->expired)) {
     $output->valid_mapping = false; // Mapping has expired so output needs to know.
@@ -138,8 +142,7 @@ if (!empty($outcomeoutput)) {
     echo $outcomeoutput;
 }
 if ($confirmtransfer == 0 && !empty($dotransfer)) {
-    if (!$transferreport->selected->is_blind_marking_turned_on || ($transferreport->selected->is_blind_marking_turned_on
-            && $transferreport->selected->revealidentities)) {
+    if (!$transferreport->is_blind_marking_enabled()) {
         $transferlist = $transferreport->get_transfer_list($dotransfer);
         echo $output->confirm_transfers($transferreport, $transferlist, $dotransfer);
     } else {
@@ -186,8 +189,9 @@ if (empty($dotransfer)) {
             $transferreport->silast = $silast;
             $transferreport->transferstatus = $transferstatus;
 
-            if (!$transferreport->selected->is_blind_marking_turned_on ||  ($transferreport->selected->is_blind_marking_turned_on
-                    && $transferreport->selected->revealidentities)) {
+            if (!$transferreport->selected->is_blind_marking_turned_on || ($transferreport->selected->is_blind_marking_turned_on
+                    && $transferreport->selected->revealidentities)
+            ) {
                 $module = array('name' => 'core_user', 'fullpath' => '/user/module.js');
                 $PAGE->requires->js_init_call('M.core_user.init_participation', null, false, $module);
 
@@ -198,7 +202,7 @@ if (empty($dotransfer)) {
                 echo '<input type="hidden" name="dotransfer" value="selected" />';
                 echo '<input type="hidden" name="returnto" value="' . s($PAGE->url->out(false)) . '" />';
                 echo "<h5>" . get_string('transferlog', 'gradereport_transfer') .
-                    " (" . get_string('transferstatus' . $transferstatus, 'gradereport_transfer') . ")</h5>";
+                    " (" . get_string('transfer_status' . $transferstatus, 'gradereport_transfer') . ")</h5>";
                 $output->grade_transfer_table($transferreport);
                 if ($output->bulkactions && $output->validmapping) {
                     // ADD CAPABILITY HERE.

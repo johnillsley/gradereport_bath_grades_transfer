@@ -32,16 +32,14 @@ $string['astcode'] = 'AST Code';
 $string['mabperc'] = 'MAB Percentage';
 $string['datefrom'] = 'Submission date after';
 $string['dateto'] = 'Submission date before';
-$string['transferstatus'] = 'Transfer status';
 $string['moodleactivitytype'] = 'Moodle Activity Type';
 $string['moodleactivityname'] = 'Moodle Activity Name';
-$string['mappingdetails'] = 'Transfer mapping details ';
-$string['transferstatus0'] = 'show all';
-$string['transferstatus1'] = 'only completed transfers';
-$string['transferstatus2'] = 'previous failed transfers';
-$string['transferstatus3'] = 'not transferred';
-$string['transferstatus4'] = 'ready to transfer';
-$string['transferstatus5'] = 'in transfer queue';
+$string['transfer_status0'] = 'show all';
+$string['transfer_status1'] = 'only completed transfers';
+$string['transfer_status2'] = 'previous failed transfers';
+$string['transfer_status3'] = 'not transferred';
+$string['transfer_status4'] = 'ready to transfer';
+$string['transfer_status5'] = 'in transfer queue';
 $string['selectassessment'] = 'Select assessment';
 $string['transferredgrade'] = 'Transferred grade';
 $string['lastsubmission'] = 'Last modified (submission)';
@@ -52,7 +50,7 @@ $string['transferpending'] = 'Not transferred yet';
 $string['transferfailed'] = 'Transfer previously failed';
 $string['transfergrade'] = 'Transfer grade';
 $string['transfergrades'] = 'Transfer grades';
-$string['academicyear'] = 'Academic year';
+$string['academicyear'] = 'Academic Year';
 $string['transferoverview'] = 'Transfer overview';
 $string['transferlog'] = 'Transfer log';
 $string['gotoactivitysettings'] = 'Go to activity settings';
@@ -87,14 +85,13 @@ $string['youhavechosen'] = 'You have chosen to transfer the grades listed below.
 $string['blind_marking_warning'] = 'Blind marking is currently enabled for this assignment.  Anonymity will need to be lifted before grades can be transferred to SAMIS.';
 $string['clicktocomplete'] = 'Click the <span style= "font-weight:bold" class="text-success">Proceed with data transfer</span> button to complete the request or
 <span style= "font-weight:bold" class="text-danger">Cancel</span> to cancel the request and return to the previous screen.';
-
+$string['transfer_progress_label'] = 'Currently {$a->graded} out of {$a->total} have been graded, {$a->transferred} have been transferred to SAMIS.';
 // HELP ICONS.
 
 $string['samis_code_help'] = 'Internal use only';
 $string['samis_code'] = 'SAMIS Assessment Code';
 $string['samis_assessment_name_help'] = 'SAMIS Assessment Name from MAB table in SAMIS';
 $string['samis_assessment_name'] = 'SAMIS Assessment Name';
-$string['samis_code'] = 'SAMIS Assessment Code';
 $string['moodle_activity_type_help'] = 'Type of Moodle Activity to send grades for';
 $string['moodle_activity_type'] = 'Moodle Activity Type';
 $string['moodle_activity_completion_help'] = 'Grades that have been successfully transferred to SAMIS will not be overwritten. If Moodle grades are updated after the transfer has taken place, the relevant SAMIS records will need be updated manually.';
@@ -102,9 +99,13 @@ $string['moodle_activity_completion'] = 'Grade Status';
 $string['moodle_activity_name_help'] = 'Name of the Moodle Activity against which the SAMIS assessment is mapped';
 $string['moodle_activity_name'] = 'Moodle Activity Name';
 $string['transfer_mapping_details_help'] = 'Transfer Mapping details set on the Activity Settings page';
-$string['transfer_mapping_details'] = 'Transfer Mapping details';
+$string['transfer_mapping_details'] = 'Transfer Mapping Details';
 $string['transfer_status_help'] = 'Status of your transfer';
 $string['transfer_status'] = 'Transfer Status';
+$string['samis_anon'] = 'Print Name in SAMIS';
+$string['samis_anon_help'] = 'Value of MABPNAM field in MAB table .<br/>
+  <strong> N </strong> = Anonymous in SAMIS <br/>
+  <strong> Y </strong> = Not anonymous in SAMIS';
 // EVENTS.
 $string['gradereport_transfer_queue'] = 'Grade Transfer Queue';
 $string['processqueuedgrades'] = 'Process Queued Grades to Transfer';
