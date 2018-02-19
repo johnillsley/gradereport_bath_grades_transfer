@@ -562,7 +562,6 @@ class transfer_report extends \grade_report
             }
             $csvexport->add_data($logdata);
         }
-        $csvexport->add_data($logdata);
         $csvexport->download_file();
         die;
         // Download all log for the current mapping ID.
