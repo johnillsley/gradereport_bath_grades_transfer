@@ -51,10 +51,20 @@ class gradereport_transfer_renderer extends plugin_renderer_base
     public function selected_mapping_overview($transferreport) {
         global $CFG, $DB, $OUTPUT, $PAGE;
         $editpageurl = $CFG->wwwroot . '/course/modedit.php?update=' . $transferreport->selected->coursemoduleid;
-        $gradespageurl = $CFG->wwwroot . '/mod/' .
-            $transferreport->selected->moodle_activity_type .
-            '/view.php?id=' . $transferreport->selected->coursemoduleid .
-            '&action=grading';
+        switch($transferreport->selected->moodle_activity_type){
+            case 'assign':
+                $gradespageurl = $CFG->wwwroot . '/mod/' .
+                    $transferreport->selected->moodle_activity_type .
+                    '/view.php?id=' . $transferreport->selected->coursemoduleid .
+                    '&action=grading';
+                break;
+            case 'quiz':
+                $gradespageurl = $CFG->wwwroot . '/mod/' .
+                    $transferreport->selected->moodle_activity_type .
+                    '/report.php?id=' . $transferreport->selected->coursemoduleid .
+                    '&mode=overview';
+                break;
+        }
 
         $usermodifier = $DB->get_record('user', array('id' => $transferreport->selected->modifierid));
         $useraction = ($transferreport->selected->timecreated == $transferreport->selected->timemodified) ?
