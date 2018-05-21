@@ -400,19 +400,21 @@ class gradereport_transfer_renderer extends plugin_renderer_base
      * @return string
      */
     public function table_bulk_actions() {
-        global $PAGE;
+        global $PAGE,$COURSE;
 
         // Bulk actions at bottom of table.
         $module = array('name' => 'core_user', 'fullpath' => '/user/module.js');
-        $PAGE->requires->js_init_call('M.core_user.init_participation', null, false, $module);
-
+        //$PAGE->requires->js_init_call('M.core_user.init_participation', null, false, $module);
+        $options = new stdClass();
+        $options->courseid = $COURSE->id;
+        $PAGE->requires->js_call_amd('core_user/participants', 'init', [$options]);
+        $buttonclasses = 'btn btn-secondary';
         $output = "";
-        $output .= '<br /><div class="buttons">';
-        $output .= '<input type="button" id="checkall" value="' . get_string('selectall') . '" /> ';
-        $output .= '<input type="button" id="checknone" value="' . get_string('deselectall') . '" /> ';
+        $output .= '<div class="selectbuttons btn-group">';
+        $output .= '<input type="button" id="checkallonpage" value="'.get_string('selectall').'" class="'. $buttonclasses .'"/> '."\n";
+        $output .= '<input type="button" id="checknone" value="'.get_string('deselectall').'" class="'. $buttonclasses .'"/> '."\n";
         $displaylist = array();
         $displaylist[$PAGE->url->out()] = get_string('transfergrades', 'gradereport_transfer');
-
         $output .= html_writer::tag('label', get_string("withselectedusers"), array('for' => 'formactionid'));
         $output .= html_writer::select($displaylist, 'formaction', '', array('' => 'choosedots'), array('id' => 'formactionid'));
 
