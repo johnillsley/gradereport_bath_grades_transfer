@@ -582,8 +582,8 @@ class gradereport_transfer_renderer extends plugin_renderer_base
 
         $actualgrade = (float)$grade->finalgrade;
         $maxgrade = (float)$grade->rawgrademax;
-        $gradedisplay = (round($actualgrade) == $actualgrade) ? $actualgrade : '<span class="max_grade_warning">' .
-            $actualgrade . '</span>';
+        $gradedisplay = (round($actualgrade) == $actualgrade) ? number_format($actualgrade,2) : '<span class="max_grade_warning">' .
+            number_format($actualgrade,2) . '</span>';
         $maxdisplay = ($maxgrade == MAX_GRADE) ? $maxgrade : '<span class="max_grade_warning">' . $maxgrade . '</span>';
         return (!empty($grade->finalgrade)) ? $gradedisplay . ' / ' . $maxdisplay : '';
     }
