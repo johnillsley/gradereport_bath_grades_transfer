@@ -121,7 +121,7 @@ class gradereport_transfer_renderer extends plugin_renderer_base
             get_string('moodleactivityname', 'gradereport_transfer') .
             $OUTPUT->help_icon('moodle_activity_name', 'gradereport_transfer'),
             '<strong>' . $transferreport->selected->moodle_activity_name .
-            '</strong> ( <i class="fa fa-pencil"></i> <a href="' . $editpageurl . '">' . get_string('editsettings') . '</a> )'
+            '</strong> ( <i class="fa fa-pencil-alt"></i> <a href="' . $editpageurl . '">' . get_string('editsettings') . '</a> )'
         );
         $table->data[] = array(
             get_string('moodleactivitycompletion', 'gradereport_transfer') .
@@ -140,7 +140,7 @@ class gradereport_transfer_renderer extends plugin_renderer_base
         );
         $table->data[] = array('Log Export', '<a href="index.php?action=download_log&id='
             . $PAGE->course->id . '&mappingid=' . $transferreport->id . '">
-            <i class=" text-success fa fa-file-excel-o"></i> Download CSV</a>');
+            <i class=" text-success fa fa-file-excel"></i> Download CSV</a>');
 
         return html_writer::table($table);
     }
@@ -542,7 +542,7 @@ class gradereport_transfer_renderer extends plugin_renderer_base
         $output = '';
         if ($willbetransferredcount > 0) {
             $output .= '<div class="spotlight spotlight-v2">
-<i class="fa fa-file-text fa-4x pull-left" style="color:#38b9ec;"></i>
+<i class="fa fa-file-alt fa-4x pull-left" style="color:#38b9ec;"></i>
 <h3>' . $transferreport->selected->samis_assessment_name . '</h3>
 <p>' . get_string('youhavechosen', 'gradereport_transfer') . '</p>
 <p>' . get_string('clicktocomplete', 'gradereport_transfer') . '<br></p>
