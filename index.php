@@ -193,7 +193,10 @@ if (empty($dotransfer)) {
                     && $transferreport->selected->revealidentities)
             ) {
                 $module = array('name' => 'core_user', 'fullpath' => '/user/module.js');
-                $PAGE->requires->js_init_call('M.core_user.init_participation', null, false, $module);
+                //$PAGE->requires->js_init_call('M.core_user.init_participation', null, false, $module);
+                $options = new stdClass();
+                $options->courseid = $course->id;
+                $PAGE->requires->js_call_amd('core_user/participants', 'init', [$options]);
 
                 echo '<form action="index.php" method="post" id="participantsform">';
                 echo '<div>';
